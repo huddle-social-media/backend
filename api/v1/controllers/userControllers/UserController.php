@@ -8,6 +8,7 @@ require_once __DIR__."/../../models/users/CasualUser.php";
 require_once __DIR__."/../../models/users/CelebrityUser.php";
 require_once __DIR__."/../../models/users/OrganizationUser.php";
 require_once __DIR__."../../../models/sessions/Session.php";
+require_once __DIR__."/../../auth/services/authorization/Authorization.php";
 
 // not sure yet
 require_once __DIR__."/../../repository/usersRepo/UserRepo.php";
@@ -329,11 +330,12 @@ abstract class UserController
                 "userId" => $user->userId
             ];
 
-            $accessToken = JWT::encode($payload, 'ABCD', 'HS256', $header);
+            $authorizationService = new \Services\Authorization();
+            $accessToken = JWT::encode($payload, $authorizationService->getSecretKey(), 'HS256', $header);
             $refreshToken = base64_encode(bin2hex(openssl_random_pseudo_bytes(32).time()));
             $session = new \Models\Session($user->userId, $refreshToken, $refreshExp);
             setcookie('refreshToken', $refreshToken, $refreshExp, '/', null, false, true);
-            
+
             $res->setSuccess(true);
             $res->setHttpStatusCode(200);
             $res->addMessage("Login succes");
