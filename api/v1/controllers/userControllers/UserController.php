@@ -7,6 +7,7 @@ require_once __DIR__."/../../helpers/PasswordHandler/PasswordHandler.php";
 require_once __DIR__."/../../models/users/CasualUser.php";
 require_once __DIR__."/../../models/users/CelebrityUser.php";
 require_once __DIR__."/../../models/users/OrganizationUser.php";
+require_once __DIR__."../../../models/sessions/Session.php";
 
 // not sure yet
 require_once __DIR__."/../../repository/usersRepo/UserRepo.php";
@@ -16,24 +17,24 @@ use \Helpers\JWT as JWT;
 use \Helpers\PasswordHandler as PasswordHandler;
 use PDOException;
 
-abstract class UserController 
+abstract class UserController
 {
     public static function signUp($req, $res)
-    {   
+    {
+        if(!($body = $req->body()))
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Request body is empty or not valid");
+            $res->send();
+            exit;
+        }
+
         if($req->contentType() !== "application/json")
         {
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
             $res->addMessage("Content type invalid");
-            $res->send();
-            exit;
-        }
-
-        if(($body = $req->body()) === false)
-        {
-            $res->setSuccess(false);
-            $res->setHttpStatusCode(400);
-            $res->addMessage("Request body contain invalid JSON");
             $res->send();
             exit;
         }
@@ -61,7 +62,7 @@ abstract class UserController
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
             $res->addMessage("Invalid request body2");
-            (strlen($body->email) < 1) ? $res->addMessage("Email can not be blank") : false ;
+            (strlen($body->email) < 1) ? $res->addMessage("Email can not be blank") : false;
             (strlen($body->email) > 255) ? $res->addMessage("Email cannot be greater than 255 characters") : false ;
             (strlen($body->password) < 1) ? $res->addMessage("Password can not be blank") : false ;
             (strlen($body->password) > 255) ? $res->addMessage("Password cannot be greater than 255 characters") : false ;
@@ -104,6 +105,48 @@ abstract class UserController
             exit;
         }
 
+        try{
+            $userRepo = new \Repository\UserRepo();
+            if($userRepo->checkUsername($body->username))
+            {
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(400);
+                $res->addMessage("Invalid request body5");
+                $res->addMessage("Username exists");
+                $res->send();
+                exit;
+            }
+        }catch(PDOException $ex)
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Invalid request body6");
+            $res->addMessage($ex->getMessage());
+            $res->send();
+            exit;
+        }
+
+        try{
+            $userRepo = new \Repository\UserRepo();
+            if($userRepo->checkEmail($body->email))
+            {
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(400);
+                $res->addMessage("Invalid request body7");
+                $res->addMessage("Email exists");
+                $res->send();
+                exit;
+            }
+        }catch(PDOException $ex)
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Invalid request body8");
+            $res->addMessage($ex->getMessage());
+            $res->send();
+            exit;
+        }
+
         if(!PasswordHandler::verifyStrength($body->password))
         {
             $res->setSuccess(false);
@@ -112,7 +155,7 @@ abstract class UserController
             $res->send();
             exit;
         }
-        
+
 
         $firstname = trim($body->firstname);
         $lastname = trim($body->lastname);
@@ -125,14 +168,21 @@ abstract class UserController
         $year = $body->dob->year;
         $month = $body->dob->month;
         $day = $body->dob->day;
-        $password = $body->password;
+        $password = PasswordHandler::bcrypt($body->password);
 
         // call the orm UserRepository
         if($type === 'casual')
         {
             try{
                 $casualUser = new \Models\CasualUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
-                var_dump($casualUser);
+                $casualUser = $casualUser->create();
+                $res->setSuccess(true);
+                $res->setHttpStatusCode(200);
+                $res->addMessage("User created successfully");
+                $res->setData(["id" => $casualUser->getUserId(),"firstname" => $casualUser->getFirstname(), "lastname" => $casualUser->getLastname(), "username" => $casualUser->getUsername(), "email" => $casualUser->getEmail(), "gender" => $casualUser->getGender(), "type" => $casualUser->getType(), "dob" => $casualUser->getDob(), "interest" => $casualUser->getInterest(), "status" => $casualUser->getStatus()]);
+                $res->send();
+                exit;
+
             }catch(Exception $ex){
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);
@@ -144,7 +194,13 @@ abstract class UserController
         {
             try{
                 $celebrityUser = new \Models\CelebrityUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
-                var_dump($celebrityUser);
+                $celebrityUser = $celebrityUser->create();
+                $res->setSuccess(true);
+                $res->setHttpStatusCode(200);
+                $res->addMessage("User created successfully");
+                $res->setData(["id" => $celebrityUser->getUserId(),"firstname" => $celebrityUser->getFirstname(), "lastname" => $celebrityUser->getLastname(), "username" => $celebrityUser->getUsername(), "email" => $celebrityUser->getEmail(), "gender" => $celebrityUser->getGender(), "type" => $celebrityUser->getType(), "dob" => $celebrityUser->getDob(), "interest" => $celebrityUser->getInterest(), "status" => $celebrityUser->getStatus()]);
+                $res->send();
+                exit;
             }catch(Exception $ex) {
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);
@@ -153,30 +209,168 @@ abstract class UserController
                 exit;
             }
         }
-    }   
+    }
 
     public static function login($req, $res)
     {
+        // simply  check the credentials and gives access
+        if(!($body = $req->body()))
+        {
+          $res->setSuccess(false);
+          $res->setHttpStatusCode(400);
+          $res->addMessage("Request body is empty or not valid");
+          $res->send();
+          exit;
+        }
+
+        if($req->contentType() !== "application/json")
+        {
+          $res->setSuccess(false);
+          $res->setHttpStatusCode(400);
+          $res->addMessage("Content type invalid");
+          $res->send();
+          exit;
+        }
+
+        if(!isset($body->email) || !isset($body->password))
+        {
+          $res->setSuccess(false);
+          $res->setHttpStatusCode(400);
+          (!isset($body->email)) ? $res->addMessage("Email not provided") : false;
+          (!isset($body->password)) ? $res->addMessage("Password not provided") : false;
+          $res->send();
+          exit;
+        }
+
+        if(strlen($body->email) < 1 || strlen($body->email) > 255 || strlen($body->password) < 1 || strlen($body->password) > 255)
+        {
+          $res->setSuccess(false);
+          $res->setHttpStatusCode(400);
+          (strlen($body->email) < 1) ? $res->addMessage("Email can not be blank") : false;
+          (strlen($body->email) > 255) ? $res->addMessage("Email cannot be greater than 255 characters") : false;
+          (strlen($body->password) < 1) ? $res->addMessage("Password can not be blank") : false;
+          (strlen($body->password) > 255) ? $res->addMessage("Password cannot be greater than 255 characters") : false;
+          $res->send();
+          exit;
+        }
+
+        try{
+            $userRepo = new \Repository\UserRepo();
+            if(!$userRepo->checkEmail($body->email))
+            {
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(400);
+                $res->addMessage("Email or password incorrect");
+                $res->send();
+                exit;
+            }
+
+            $email = $body->email;
+            $password = $body->password;
+            $user = $userRepo->getUser($email);
+
+            if($user->banned === true)
+            {
+                // redirected to banned page
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(401);
+                $res->addMessage("User banned from the platform");
+                $res->send();
+                exit;
+            }
+
+            if($user->status === 'locked')
+            {
+                // redirect to locked page
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(401);
+                $res->addMessage("User locked from the platform");
+                $res->send();
+                exit;
+            }
+
+            if($user->status === 'unverified')
+            {
+                // redirect to unverified page
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(401);
+                $res->addMessage("User unverified");
+                $res->send();
+                exit;
+            }
+
+            if($user->loginAttempts >= 5)
+            {
+                // redirect to locked page
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(401);
+                $res->addMessage("Account locked due to login attempts");
+                $res->send();
+                exit;
+            }
+
+            if(!password_verify($password, $user->password))
+            {
+                // redirect to login failed
+                $res->setSuccess(false);
+                $res->setHttpStatusCode(401);
+                $res->addMessage("Email or password incorrect");
+                $res->send();
+                exit;
+            }
+
+            $refreshExp = time()+30*86400;
+            $accessExp = time()+30;
+
+            $header = [
+                "exp" => $accessExp
+            ];
+            $payload = [
+                "userId" => $user->userId
+            ];
+
+            $accessToken = JWT::encode($payload, 'ABCD', 'HS256', $header);
+            $refreshToken = base64_encode(bin2hex(openssl_random_pseudo_bytes(32).time()));
+            $session = new \Models\Session($user->userId, $refreshToken, $refreshExp);
+            setcookie('refreshToken', $refreshToken, $refreshExp, '/', null, false, true);
+            
+            $res->setSuccess(true);
+            $res->setHttpStatusCode(200);
+            $res->addMessage("Login succes");
+            unset($user->password);
+            $res->setData(["accessToken" => $accessToken, "user" => $user]);
+            $session->create();
+            $res->send();
+            exit;
+        }catch(PDOException $ex) {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(500);
+            $res->addMessage($ex->getMessage());
+            $res->send();
+            exit;
+        }
 
     }
 
+
+    // helper route for checking the validity of the username
     public static function checkUsername($req, $res)
     {
-     
+
+        if($body = $req->body())
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Request body is empty or not valid");
+            $res->send();
+            exit;
+        }
+
         if($req->contentType() !== "application/json")
         {
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
             $res->addMessage("Content type invalid");
-            $res->send();
-            exit;
-        }
-
-        if(($body = $req->body()) === false)
-        {
-            $res->setSuccess(false);
-            $res->setHttpStatusCode(400);
-            $res->addMessage("Request body contain invalid JSON");
             $res->send();
             exit;
         }
@@ -226,5 +420,10 @@ abstract class UserController
             $res->send();
             exit;
         }
+    }
+
+    public static function sayHello()
+    {
+        echo "Hello</br>";
     }
 }

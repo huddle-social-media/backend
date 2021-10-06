@@ -10,15 +10,16 @@ use \Helpers\PasswordHandler as PasswordHandler;
 
 abstract class User
 {
-    private $userId;
+    private $userId = null;
     private $username;
     private $email;
     private $interest;
     private $banned = false;
     private $loginAttempts = 0;
+    private $loggedIn = false;
     protected $status;
     protected $type;
-    protected $hashedPassword;
+    protected $password;
 
 
     public function __construct($username, $email, $interest, $password)
@@ -45,9 +46,9 @@ abstract class User
 
     public function setPassword($password)
     {
-        if(!PasswordHandler::verifyStrength($password))
-            throw new Exception("Password is too weak");
-        $this->hashedPassword = PasswordHandler::bcrypt($password);
+        if(strlen($password) < 1 || strlen($password) > 255)
+            throw new Exception("Can not set the password");
+        $this->password = $password;
     }
 
     public function setEmail($email)
@@ -57,11 +58,18 @@ abstract class User
             throw new Exception("Can not set the email");
         $this->email = $email;
     }
-    
+
+    public function setLoggedIn($loginStatus)
+    {
+        if(!is_bool($loginStatus))
+            throw new Exception("Can not change the login status");
+        $this->loggedIn = $loginStatus;
+    }
+
     public function setInterest($interest)
     {
         if(strlen($interest) < 1 || strlen($interest) > 255)
-        throw new Exception("Can not set the interest");
+            throw new Exception("Can not set the interest");
         $this->interest = $interest;
     }
 
@@ -75,7 +83,52 @@ abstract class User
         // need to implement
     }
 
+    public function getUserId()
+    {
+        return $this->userId;
+    }
+
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    public function getInterest()
+    {
+        return $this->interest;
+    }
+
+    public function getLoggedIn()
+    {
+        return $this->loggedIn;
+    }
+
+    public function getLoginAttempts()
+    {
+        return $this->loginAttempts;
+    }
+
+    public function getHashedPassword()
+    {
+        return $this->password;
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    public function getType()
+    {
+        return $this->type;
+    }
+
     abstract public function setType($type);
     abstract public function setStatus($status);
-    abstract public function addUser();
+    abstract public function create();
 }

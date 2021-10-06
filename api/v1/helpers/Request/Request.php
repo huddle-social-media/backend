@@ -2,7 +2,7 @@
 
 namespace Helpers;
 
-class Request 
+class Request
 {
     /**
      * defining private variables
@@ -20,9 +20,11 @@ class Request
     private array $headers;
     private array $form;
     private string $contentType;
+    private string $refreshToken;
+    private string $httpAuth;
 
     public function __construct()
-    {   
+    {
         // set the body
         $this->setBody();
 
@@ -41,7 +43,7 @@ class Request
         // set params
         $this->setParams();
 
-        // set request uri 
+        // set request uri
         $this->path = parse_url($_SERVER['REQUEST_URI'])['path'];
 
         // set protocol
@@ -61,12 +63,15 @@ class Request
 
         // set headers
         $this->headers = getallheaders();
+
+        $this->setRefreshToken();
+        $this->setHttpAuth();
     }
 
     /**
      * Setting the request body using content string
      * if request content exists, otherwise setting body to null
-     * 
+     *
      * @return void
      */
     private function setBody()
@@ -76,15 +81,15 @@ class Request
             $this->body = $data;
             return;
         }
-        $this->body = null;
+        $this->body = (object)[];
     }
 
     /**
      * Setting request parameters
-     * 
+     *
      * ex: /posts/852/comments/14
      * params = [1=>852, 2=>14]
-     * 
+     *
      * @return void
      */
     private function setParams()
@@ -94,19 +99,40 @@ class Request
         $this->params = $matches[0];
     }
 
+    private function setRefreshToken()
+    {
+        if(!isset($_COOKIE['refreshToken']))
+        {
+            $this->refreshToken = '';
+            return;
+        }
+        $this->refreshToken = $_COOKIE['refreshToken'];
+    }
+
+    private function setHttpAuth()
+    {
+        if(!isset($_SERVER['HTTP_AUTHORIZATION']))
+        {
+            $this->httpAuth = '';
+            return;
+        }
+        $this->httpAuth = $_SERVER['HTTP_AUTHORIZATION'];
+
+    }
+
     /**
      * get body
-     * 
+     *
      * @return array/object body
      */
-    public function body() 
+    public function body()
     {
         return $this->body;
     }
 
     /**
      * get cookies
-     * 
+     *
      * @return array cookies
      */
     public function cookies()
@@ -116,7 +142,7 @@ class Request
 
     /**
      * get hostname
-     * 
+     *
      * @return string hostname
      */
     public function hostname()
@@ -126,7 +152,7 @@ class Request
 
     /**
      * get ip from the remote server
-     * 
+     *
      * @return string ip
      */
     public function ip()
@@ -137,7 +163,7 @@ class Request
     /**
      * get originalUri
      * ex: returning /posts?search=1
-     * 
+     *
      * @return string originalUri
      */
     public function originalUri()
@@ -147,7 +173,7 @@ class Request
 
     /**
      * get params
-     * 
+     *
      * @return array params
      */
     public function params()
@@ -158,7 +184,7 @@ class Request
     /**
      * get path
      * ex: /posts/2
-     * 
+     *
      * @return string path
      */
     public function path()
@@ -169,7 +195,7 @@ class Request
     /**
      * get request protocol
      * ex:http/1.1
-     * 
+     *
      * @return string protocol
      */
     public function protocol()
@@ -179,7 +205,7 @@ class Request
 
     /**
      * get query strings
-     * 
+     *
      * @return array query
      */
     public function query()
@@ -189,7 +215,7 @@ class Request
 
     /**
      * get request method
-     * 
+     *
      * @return string method
      */
     public function method()
@@ -199,7 +225,7 @@ class Request
 
     /**
      * get headers
-     * 
+     *
      * @return array headers
      */
     public function headers()
@@ -209,7 +235,7 @@ class Request
 
     /**
      * get form data that come through POST
-     * 
+     *
      * @return array form
      */
     public function form()
@@ -220,11 +246,21 @@ class Request
     /**
      * get contentType
      * ex: application/json
-     * 
+     *
      * @return string contentType
      */
     public function contentType()
     {
         return $this->contentType;
+    }
+
+    public function refreshToken()
+    {
+        return $this->refreshToken;
+    }
+
+    public function httpAuth()
+    {
+        return $this->httpAuth;
     }
 }
