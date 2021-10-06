@@ -232,7 +232,7 @@ class AuthController
         }catch(\Exception $ex) // for catching JWT exceptio, but needed proper exeception handling
         {
             $res->setSuccess(false);
-            $res->setHttpStatusCode(500);
+            $res->setHttpStatusCode(400);
             $res->addMessage($ex->getMessage());
             $res->send();
             exit;
@@ -255,7 +255,7 @@ class AuthController
             $authorizationService = new \Services\Authorization();
             $session = self::authRefreshToken($req, $res, $authenticateService,$authRepo);
             $payload = self::authAccessToken($req, $res, $authorizationService);
-            self::authRequestedClient($req, $session, $payload->userId, $authRepo);
+            self::authRequestedClient($req, $session, $payload, $authRepo);
             call_user_func_array($next, [$req, $res, $payload->userId]);
         }catch(\PDOException $ex){
             $res->setSuccess(false);
