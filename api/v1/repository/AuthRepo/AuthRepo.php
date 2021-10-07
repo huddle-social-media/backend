@@ -21,7 +21,7 @@ class AuthRepo
         $query->execute();
 
         if(!$query->rowCount())
-            return (object)[];
+            return null;
         $row = $query->fetch(\PDO::FETCH_ASSOC);
         $session = new \Models\Session(intval($row['user_id']), $row['refreshToken'], strtotime($row['exp']));
         $session->setSessionId(intval($row['session_id']));
@@ -35,8 +35,8 @@ class AuthRepo
         $query->execute();
         
         if(!$query->rowCount())
-            return (object)[];
-        
+            return null;
+            
         $row = $query->fetch(\PDO::FETCH_ASSOC);
         return (object)["banned" => boolval($row['banned']), "status" => $row['status'], "login_attempts" => intval($row['login_attempts'])] ;
     }
