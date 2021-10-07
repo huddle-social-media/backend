@@ -46,7 +46,17 @@ class Authorization
     public function isAccessTokenVerified($httpAuth)
     {
         $segments = explode('.', $this->extractAccessToken($httpAuth));
-        if(count($segments) !== 3 || ($alg = json_decode(\Helpers\JWT::urlSafeBase64Decode($segments[0]))) || !\Helpers\JWT::verify($segments[0].'.'.$segments[1], $segments[2], self::SECRET_KEY, $alg))
+        if(count($segments) !== 3)
+            return false;
+        $header = json_decode(\Helpers\JWT::urlSafeBase64Decode($segments[0]));
+        $payload = json_decode(\Helpers\JWT::urlSafeBase64Decode($segments[1]));
+
+        // it is necessary to contain alg and the exp
+        if(!$header || !$payload || !property_exists($header, 'alg') || !property_exists($payload, 'exp'))
+            return false;
+        $alg = $header->alg;
+        $exp = $payload->exp;
+        if(!is_numeric($exp) || strlen($alg) > 1 || !\Helpers\JWT::verify($segments[0].'.'.$segments[1], $segments[2], self::SECRET_KEY, $alg))
             return false;
         return true;
     } 

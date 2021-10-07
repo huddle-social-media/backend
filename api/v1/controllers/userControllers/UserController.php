@@ -323,15 +323,13 @@ abstract class UserController
             $refreshExp = time()+30*86400;
             $accessExp = time()+30;
 
-            $header = [
-                "exp" => $accessExp
-            ];
             $payload = [
-                "userId" => $user->userId
+                "userId" => $user->userId,
+                "exp" => $accessExp
             ];
 
             $authorizationService = new \Services\Authorization();
-            $accessToken = JWT::encode($payload, $authorizationService->getSecretKey(), 'HS256', $header);
+            $accessToken = JWT::encode($payload, $authorizationService->getSecretKey(), 'HS256');
             $refreshToken = base64_encode(bin2hex(openssl_random_pseudo_bytes(32).time()));
             $session = new \Models\Session($user->userId, $refreshToken, $refreshExp);
             setcookie('refreshToken', $refreshToken, $refreshExp, '/', null, false, true);
