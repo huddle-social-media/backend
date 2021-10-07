@@ -22,7 +22,7 @@ abstract class UserController
 {
     public static function signUp($req, $res)
     {
-        if(!($body = $req->body()))
+        if(($body = $req->body()) === null)
         {
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
