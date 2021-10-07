@@ -7,21 +7,21 @@ class Request
     /**
      * defining private variables
      */
-    private mixed $body;
-    private array $cookies;
-    private string $hostname;
-    private string $ip;
-    private string $originalUri;
-    private array $params;
-    private string $path;
-    private string $protocol;
-    private array $query;
-    private string $method;
-    private array $headers;
-    private array $form;
-    private string $contentType;
-    private string $refreshToken;
-    private string $httpAuth;
+    private $body;
+    private $cookies;
+    private $hostname;
+    private $ip;
+    private $originalUri;
+    private $params;
+    private $path;
+    private $protocol;
+    private $query;
+    private $method;
+    private $headers;
+    private $form;
+    private $contentType;
+    private $refreshToken;
+    private $httpAuth;
 
     public function __construct()
     {
