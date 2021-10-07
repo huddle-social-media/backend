@@ -10,7 +10,7 @@ require_once __DIR__."/../../helpers/JWT/JWT.php";
 class AuthController
 {
     /**
-     * Ahuthenticating the refresh token
+     * Ahuthenticate the refresh token
      * 
      * @param object req The request object
      * @param object res The response object
