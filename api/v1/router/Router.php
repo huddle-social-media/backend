@@ -26,7 +26,7 @@ class Router
      * 
      * return void
      */
-    public static function post(string $path, $callback, $secure = true)
+    public static function post($path, $callback, $secure = true)
     {
         self::add(self::$METHOD_POST, $path, $callback, $secure);
     }
@@ -39,7 +39,7 @@ class Router
      * 
      * return void
      */
-    public static function get(string $path, $callback, $secure = true) 
+    public static function get($path, $callback, $secure = true) 
     {
         self::add(self::$METHOD_GET, $path, $callback, $secure);
     }
@@ -52,7 +52,7 @@ class Router
      * 
      * return void
      */
-    public static function patch(string $path, $callback, $secure = true) 
+    public static function patch($path, $callback, $secure = true) 
     {
         self::add(self::$METHOD_PATCH, $path, $callback, $secure);
     }
@@ -65,7 +65,7 @@ class Router
      * 
      * return void
      */
-    public static function delete(string $path, $callback, $secure = true) 
+    public static function delete($path, $callback, $secure = true) 
     {
         self::add(self::$METHOD_DELETE, $path, $callback, $secure);
     }
@@ -79,7 +79,7 @@ class Router
      * 
      * return void
      */
-    private static function add(string $method, string $path, $callback, $secure) 
+    private static function add($method, $path, $callback, $secure) 
     {
         self::$routingTable[$method.$path] = (object)[
             "callback" => $callback,
