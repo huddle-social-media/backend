@@ -81,7 +81,7 @@ class Request
             $this->body = $data;
             return;
         }
-        $this->body = (object)[];
+        $this->body = null;
     }
 
     /**
