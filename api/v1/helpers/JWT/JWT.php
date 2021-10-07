@@ -33,7 +33,7 @@ class JWT {
      * 
      * return string encoded input
      */
-    public static function urlSafeBase64Encode(string $input) 
+    public static function urlSafeBase64Encode($input) 
     {
         return \str_replace('=', '', \strtr(\base64_encode($input), '+/', '-_'));
     }
@@ -46,7 +46,7 @@ class JWT {
      * 
      * return string decoded input
      */
-    public static function urlSafeBase64Decode(string $input)
+    public static function urlSafeBase64Decode($input)
     {
         $charCount = 4;
         $remain = strlen($input) % $charCount;
@@ -71,7 +71,7 @@ class JWT {
      * return string encrypted message
      */
 
-    public static function sign(string $msg, string $key, string $alg = "HS256")   
+    public static function sign($msg, $key, $alg = "HS256")   
     {
         if(empty(self::$supportedAlgs[$alg]))
         {
@@ -97,7 +97,7 @@ class JWT {
      * 
      * return jwt token
      */
-    public static function encode(mixed $payload, string $key, string $alg = "HS256", array $head = null)
+    public static function encode($payload, $key, $alg = "HS256", $head = null)
     {
         $header = ["typ" => "JWT", "alg" => $alg];
         if(isset($head) && is_array($head))
@@ -125,7 +125,7 @@ class JWT {
      * 
      * return true if msg verify with the signature, otherwise false 
      */
-    public static function verify(string $msg, string $signature, string $key, string $alg) 
+    public static function verify($msg, $signature, $key, $alg) 
     {
         if(empty(self::$supportedAlgs[$alg])) 
         {
@@ -153,7 +153,7 @@ class JWT {
      * 
      * return The payload that include in the provided jwt token
      */
-    public static function decode(string $jwt, string $key)
+    public static function decode($jwt, $key)
     {
         $timestamp = time();
         if(empty($key)) 
@@ -216,7 +216,6 @@ class JWT {
         {
             throw new UnexpectedValueException("Token is expired");
         }
-
         return $payload;
     }
 }
