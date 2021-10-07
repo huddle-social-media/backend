@@ -46,7 +46,7 @@ class UserRepo
         $query->bindValue(':email', $email, \PDO::PARAM_STR);
         $query->execute();
         if(!$query->rowCount())
-          return  (object)[];
+          return  null;
         $row = $query->fetch(\PDO::FETCH_ASSOC);
         return (object)[
             "firstname" => $row['firstname'],
