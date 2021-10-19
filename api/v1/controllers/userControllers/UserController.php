@@ -429,7 +429,7 @@ abstract class UserController
 
     public static function enableCrosOrigin($req, $res) 
     {
-        if($_SERVER['REQUEST_METHOD'] === 'OPTIONS')
+        if($req->method() === 'OPTIONS')
         {
             header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
             header('Access-Control-Allow-Headers: Content-Type, Authorization');
