@@ -79,6 +79,29 @@ class Request
         $this->body = null;
     }
 
+    public function validateRequest($res)
+    {
+        if($this->contentType() !== "application/json")
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Content type invalid");
+            $res->send();
+            exit;
+        }
+
+        if(($body = $this->body()) === false)
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Request body contain invalid JSON");
+            $res->send();
+            exit;
+        }
+
+        return $body;
+    }
+
     /**
      * Setting request parameters
      * 

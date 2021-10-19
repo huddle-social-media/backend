@@ -2,14 +2,8 @@
 
 namespace Controllers;
 
-require_once __DIR__."/../../helpers/JWT/JWT.php";
-require_once __DIR__."/../../helpers/PasswordHandler/PasswordHandler.php";
-require_once __DIR__."/../../models/users/CasualUser.php";
-require_once __DIR__."/../../models/users/CelebrityUser.php";
-require_once __DIR__."/../../models/users/OrganizationUser.php";
+require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
-// not sure yet
-require_once __DIR__."/../../repository/usersRepo/UserRepo.php";
 
 use Exception;
 use \Helpers\JWT as JWT;
@@ -20,23 +14,7 @@ abstract class UserController
 {
     public static function signUp($req, $res)
     {   
-        if($req->contentType() !== "application/json")
-        {
-            $res->setSuccess(false);
-            $res->setHttpStatusCode(400);
-            $res->addMessage("Content type invalid");
-            $res->send();
-            exit;
-        }
-
-        if(($body = $req->body()) === false)
-        {
-            $res->setSuccess(false);
-            $res->setHttpStatusCode(400);
-            $res->addMessage("Request body contain invalid JSON");
-            $res->send();
-            exit;
-        }
+        $body = $req->validateRequest($res);
 
         if(!isset($body->email) || !isset($body->username) || !isset($body->password) || !isset($body->type) || !isset($body->firstname) || !isset($body->lastname) || !isset($body->gender) || !isset($body->dob) || !isset($body->interest))
         {
@@ -128,31 +106,31 @@ abstract class UserController
         $password = $body->password;
 
         // call the orm UserRepository
-        if($type === 'casual')
-        {
-            try{
-                $casualUser = new \Models\CasualUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
-                var_dump($casualUser);
-            }catch(Exception $ex){
-                $res->setSuccess(false);
-                $res->setHttpStatusCode(400);
-                $res->addMessage($ex->getMessage());
-                $res->send();
-                exit;
-            }
-        }else if($type === 'celebrity')
-        {
-            try{
-                $celebrityUser = new \Models\CelebrityUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
-                var_dump($celebrityUser);
-            }catch(Exception $ex) {
-                $res->setSuccess(false);
-                $res->setHttpStatusCode(400);
-                $res->addMessage($ex->getMessage());
-                $res->send();
-                exit;
-            }
-        }
+        // if($type === 'casual')
+        // {
+        //     try{
+        //         $casualUser = new \Models\CasualUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
+        //         var_dump($casualUser);
+        //     }catch(Exception $ex){
+        //         $res->setSuccess(false);
+        //         $res->setHttpStatusCode(400);
+        //         $res->addMessage($ex->getMessage());
+        //         $res->send();
+        //         exit;
+        //     }
+        // }else if($type === 'celebrity')
+        // {
+        //     try{
+        //         $celebrityUser = new \Models\CelebrityUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
+        //         var_dump($celebrityUser);
+        //     }catch(Exception $ex) {
+        //         $res->setSuccess(false);
+        //         $res->setHttpStatusCode(400);
+        //         $res->addMessage($ex->getMessage());
+        //         $res->send();
+        //         exit;
+        //     }
+        // }
     }   
 
     public static function login($req, $res)
@@ -201,8 +179,8 @@ abstract class UserController
 
         $username = $body->username;
         try{
-            $userRepo = new \Repository\UserRepo();
-            if($userRepo->checkUsername($username))
+            
+            if(\Repository\ORM\ORM::checkUsername($body->username))
             {
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);
