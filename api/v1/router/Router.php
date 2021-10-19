@@ -16,6 +16,7 @@ class Router
     private static $METHOD_GET = 'GET';
     private static $METHOD_DELETE = 'DELETE';
     private static $METHOD_PATCH = 'PATCH';
+    private static $METHOD_OPTIONS = 'OPTIONS';
 
 
     /**
@@ -68,6 +69,19 @@ class Router
     public static function delete($path, $callback, $secure = true) 
     {
         self::add(self::$METHOD_DELETE, $path, $callback, $secure);
+    }
+
+    /**
+     * Registering OPTIONS routes
+     * 
+     * @param string path The route
+     * @param function callback The handler for registered route
+     * 
+     * return void
+     */
+    public static function options($path, $callback, $secure = true) 
+    {
+        self::add(self::$METHOD_OPTIONS, $path, $callback, $secure);
     }
 
     /**

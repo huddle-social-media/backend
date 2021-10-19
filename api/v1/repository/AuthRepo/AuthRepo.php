@@ -30,7 +30,7 @@ class AuthRepo
 
     public function getUserStatus($userId)
     {
-        $query = $this->connection->prepare('SELECT banned, status, login_attempts FROM users_tbl WHERE user_id = :user_id');
+        $query = $this->connection->prepare('SELECT banned, status, login_attempts, type FROM users_tbl WHERE user_id = :user_id');
         $query->bindParam(':user_id', $userId, \PDO::PARAM_INT);
         $query->execute();
         
@@ -38,6 +38,6 @@ class AuthRepo
             return null;
             
         $row = $query->fetch(\PDO::FETCH_ASSOC);
-        return (object)["banned" => boolval($row['banned']), "status" => $row['status'], "login_attempts" => intval($row['login_attempts'])] ;
+        return (object)["banned" => boolval($row['banned']), "status" => $row['status'], "login_attempts" => intval($row['login_attempts']), "type" => $row['type']] ;
     }
 }

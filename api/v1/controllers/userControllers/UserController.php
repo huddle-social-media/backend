@@ -156,8 +156,7 @@ abstract class UserController
             $res->send();
             exit;
         }
-
-
+        
         $firstname = trim($body->firstname);
         $lastname = trim($body->lastname);
         $username = trim($body->username);
@@ -325,7 +324,8 @@ abstract class UserController
 
             $payload = [
                 "userId" => $user->userId,
-                "exp" => $accessExp
+                "exp" => $accessExp,
+                "aud" => $user->type
             ];
 
             $authorizationService = new \Services\Authorization();
@@ -426,4 +426,17 @@ abstract class UserController
     {
         echo "Hello</br>";
     }
+
+    public static function enableCrosOrigin($req, $res) 
+    {
+        if($_SERVER['REQUEST_METHOD'] === 'OPTIONS')
+        {
+            header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+            header('Access-Control-Allow-Headers: Content-Type, Authorization');
+            header('Access-Control-Max-Age: 5184000');
+            $res->setSuccess(true);
+            $res->setHttpStatusCode(200);
+            $res->send();
+        }
+    } 
 }

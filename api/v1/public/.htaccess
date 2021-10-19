@@ -1,4 +1,5 @@
 # Redirecting all requests through public/index.php
+Header Set Access-Control-Allow-Origin "*"
 
 RewriteEngine on
 RewriteBase /

@@ -24,7 +24,7 @@ class Response {
 
 	// define addMessage method - can add any error or information info
 	public function addMessage($message) {
-		$this->_messages[] = $message;
+		array_push($this->_messages, $message);
 	}
 
 	// define setData method - can be used to add any data
