@@ -2,73 +2,74 @@
 
 namespace Router;
 
-require_once __DIR__."/../helpers/Request/Request.php";
-require_once __DIR__."/../helpers/Response/Response.php";
-require_once __DIR__."/../auth/controllers/AuthController.php";
+require_once __DIR__."/../helpers/autoLoader/autoLoader.php";
 
 use \Helpers\Request as Request;
 use \Helpers\Response as Response;
 
 class Router
 {
-    private static $routingTable = [];
-    private static $METHOD_POST = 'POST';
-    private static $METHOD_GET = 'GET';
-    private static $METHOD_DELETE = 'DELETE';
-    private static $METHOD_PATCH = 'PATCH';
-    private static $METHOD_OPTIONS = 'OPTIONS';
+    private static $routeTable = [];
+    private const METHOD_POST = 'POST';
+    private const METHOD_GET = 'GET';
+    private const METHOD_DELETE = 'DELETE';
+    private const METHOD_PATCH = 'PATCH';
+    private const METHOD_OPTIONS = 'OPTIONs';
 
 
     /**
-     * Registering POST routes
+ 
+
+    /**
+     * Add a POST route
      * 
-     * @param string path The route
-     * @param function callback The handler for registered route
+     * @param string $path Path to the resource
+     * @param function $handler The handler for the resource
      * 
-     * return void
+     * @return void
      */
-    public static function post($path, $callback, $secure = true)
+    public static function post(string $path, $handler, $secure = true):void
     {
-        self::add(self::$METHOD_POST, $path, $callback, $secure);
+        self::addCallback(self::METHOD_POST, $path, $handler, $secure);
     }
 
     /**
-     * Registering GET routes
+     * Add a GET route
      * 
-     * @param string path The route
-     * @param function callback The handler for registered route
+     * @param string $path Path to the resource
+     * @param function $handler The handler for the resource
      * 
-     * return void
+     * @return void
      */
-    public static function get($path, $callback, $secure = true) 
+    public static function get(string $path, $handler, $secure = true):void 
     {
-        self::add(self::$METHOD_GET, $path, $callback, $secure);
+        self::addCallback(self::METHOD_GET, $path, $handler, $secure);
     }
 
     /**
-     * Registering PATCH routes
+     * Add a PATCH route
      * 
-     * @param string path The route
-     * @param function callback The handler for registered route
+     * @param string $path Path to the resource
+     * @param function $handler The handler for the resource
      * 
-     * return void
+     * @return void
      */
-    public static function patch($path, $callback, $secure = true) 
+    public static function patch(string $path, $handler, $secure = true):void
     {
-        self::add(self::$METHOD_PATCH, $path, $callback, $secure);
+        self::addCallback(self::METHOD_PATCH, $path, $handler, $secure);
     }
 
     /**
-     * Registering DELETE routes
+     * Add a DELETE route
      * 
-     * @param string path The route
-     * @param function callback The handler for registered route
+     * @param string $path Path to the resource
+     * @param function $handler The handler for the resource
      * 
-     * return void
+     * @return void
      */
-    public static function delete($path, $callback, $secure = true) 
+    public static function delete(string $path, $handler, $secure = true):void
     {
-        self::add(self::$METHOD_DELETE, $path, $callback, $secure);
+        self::addCallback(self::METHOD_DELETE, $path, $handler, $secure);
     }
 
     /**
@@ -77,49 +78,58 @@ class Router
      * @param string path The route
      * @param function callback The handler for registered route
      * 
-     * return void
+     * @return void
      */
-    public static function options($path, $callback, $secure = true) 
+    public static function options($path, $handler, $secure = true):void
     {
-        self::add(self::$METHOD_OPTIONS, $path, $callback, $secure);
+        self::addCallback(self::METHOD_OPTIONS, $path, $handler, $secure);
     }
 
+
     /**
-     * Registering provided route to the routing table
+     * Add a route to the routeTable
      * 
-     * @param string method The method
-     * @param string path The route to register
-     * @param function callback The handler
+     * @param string $method The request method
+     * @param string $path The path to the resource
+     * @param function $handler The handler for the resource
      * 
-     * return void
+     * @return void
      */
-    private static function add($method, $path, $callback, $secure) 
+
+    private static function addCallback(string $method, string $path, $handler, $secure):void
     {
-        self::$routingTable[$method.$path] = (object)[
-            "callback" => $callback,
+        self::$routeTable[$method.$path] = (object)[
+            "callback" => $handler,
             "secure" => $secure
         ];
     }
 
 
     /**
-     * Listening to incoming requests and distributes to appropriate handlers
+     * Listens to incoming requests and distributes to appropriate handlers
      * 
-     * @param function callback The callback
-     * 
-     * return void
+     * @return void
      */
     public static function listen($callback)
     {
-        $requestedRoute = parse_url($_SERVER['REQUEST_URI'])['path'];
-        $generalRoute = preg_replace('/[\d]+/', ':id', $requestedRoute);
-        $generalRoute = $_SERVER['REQUEST_METHOD'].$generalRoute;
-        if(!array_key_exists($generalRoute, self::$routingTable))
+        $requestURL = parse_url($_SERVER['REQUEST_URI']);
+        $requestPath = $requestURL['path'];                                                 // get path from URL
+        $requestPath = preg_replace('/[\d]+/', ':id', $requestPath);                        // replace actual id with string 'id'
+        $requestMethod = $_SERVER['REQUEST_METHOD'];
+        if(!array_key_exists($requestMethod.$requestPath, self::$routeTable))
         {
-            echo "<h1>404</h1>";
-            return;
+            $response = new \Helpers\Response();
+            $response->addMessage("Resource not found");
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->send();
+            exit;
+            
         }
-        $route = self::$routingTable[$generalRoute];
+        
+        $route = self::$routeTable[$requestMethod.$requestPath];
+        
+
         $req = new Request();
         $res = new Response();
         if($route->secure === true)
@@ -127,5 +137,5 @@ class Router
         else
             call_user_func_array($route->callback, [$req, $res]);
         $callback($_SERVER['SERVER_PORT']);
-    }
+   }
 }
