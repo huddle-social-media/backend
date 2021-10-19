@@ -1,9 +1,7 @@
 <?php
 namespace Router;
 
-require_once __DIR__."/../helpers/Request/Request.php";
-require_once __DIR__."/../helpers/Response/Response.php";
-
+require_once __DIR__."/../helpers/autoLoader/autoLoader.php";
 
 
 class Router
