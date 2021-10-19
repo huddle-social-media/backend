@@ -52,7 +52,7 @@ class Authorization
         $payload = json_decode(\Helpers\JWT::urlSafeBase64Decode($segments[1]));
 
         // it is necessary to contain alg and the exp
-        if(!$header || !$payload || !property_exists($header, 'alg') || !property_exists($payload, 'exp'))
+        if(!$header || !$payload || !property_exists($header, 'alg') || !property_exists($payload, 'exp') || !property_exists($payload, 'exp'))
             return false;
         $alg = $header->alg;
         $exp = $payload->exp;

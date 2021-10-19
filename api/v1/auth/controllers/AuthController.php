@@ -119,6 +119,15 @@ class AuthController
             exit;
         }
 
+        if($userStatus->type !== $payload->aud)
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(403);
+            $res->addMessage("Unauthorized user request");
+            $res->send();
+            exit; 
+        }
+
         if($userStatus->banned === true)
         {
             // redirected to banned page
@@ -255,7 +264,7 @@ class AuthController
             $authorizationService = new \Services\Authorization();
             $session = self::authRefreshToken($req, $res, $authenticateService,$authRepo);
             $payload = self::authAccessToken($req, $res, $authorizationService);
-            self::authRequestedClient($req, $session, $payload, $authRepo);
+            self::authRequestedClient($res, $session, $payload, $authRepo);
             call_user_func_array($next, [$req, $res, $payload->userId]);
         }catch(\PDOException $ex){
             $res->setSuccess(false);
