@@ -19,7 +19,7 @@ class AuthController
      * 
      * @return object session if the refresh token is authenticated, return valid session
      */
-    private static function authRefreshToken($req, $res, $authenticateService, $authRepo)
+    private static function authRefreshToken($req, $res, $authenticateService)//, $authRepo)
     {
         if(empty($req->refreshToken()))
         {
@@ -31,7 +31,7 @@ class AuthController
         }
 
         try {
-            $session = $authRepo->getSession($req->refreshToken());
+            $session = \Repository\ORM\ORM::makeSession($req->refreshToken());
             
             if($session === null)
             {
@@ -79,7 +79,7 @@ class AuthController
      * 
      * @return void
      */
-    private static function authRequestedClient($res, $session, $payload, $authRepo)
+    private static function authRequestedClient($res, $session, $payload)//, $authRepo)
     {
         if(!property_exists($payload, 'userId') || !is_numeric($payload->userId) || $payload->userId < 0){
             $res->setSuccess(false);
@@ -99,7 +99,7 @@ class AuthController
         }
 
         try{
-            $userStatus = $authRepo->getUserStatus($session->getUserId());
+            $userStatus = \Repository\ORM\ORM::makeUserStatus($session->getUserId());
         } 
         catch(\PDOException $ex)
         {
@@ -259,12 +259,14 @@ class AuthController
     public static function auth($req, $res, $next)
     {
         try {
-            $authRepo = new \Repository\AuthRepo();
+            //$authRepo = new \Repository\AuthRepo();
             $authenticateService = new \Services\Authentication();
             $authorizationService = new \Services\Authorization();
-            $session = self::authRefreshToken($req, $res, $authenticateService,$authRepo);
+            //$session = self::authRefreshToken($req, $res, $authenticateService,$authRepo);
+            $session = self::authRefreshToken($req, $res, $authenticateService);
             $payload = self::authAccessToken($req, $res, $authorizationService);
-            self::authRequestedClient($res, $session, $payload, $authRepo);
+            //self::authRequestedClient($res, $session, $payload, $authRepo);
+            self::authRequestedClient($res, $session, $payload);
             call_user_func_array($next, [$req, $res, $payload->userId]);
         }catch(\PDOException $ex){
             $res->setSuccess(false);

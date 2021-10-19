@@ -2,7 +2,7 @@
 
 namespace Models;
 
-require_once __DIR__."/../../repository/sessionRepo/SessionRepo.php";
+require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 use Exception;
 
@@ -13,7 +13,13 @@ class Session
     private $refreshToken;
     private $expirationTime;
 
-    public function __construct($userId, $refreshToken, $expirationTime)
+   
+    public static function create()
+    {
+        return new self();
+    }
+
+    public function initialize($userId, $refreshToken, $expirationTime)
     {
         $this->setUserId($userId);
         $this->setRefreshToken($refreshToken);
@@ -73,17 +79,5 @@ class Session
         if(time() >= $this->expirationTime)
             return true;
         return false;
-    }
-
-    public function create()
-    {
-        $sessionRepo = new \Repository\SessionRepo();
-        $sessionRepo->create($this);
-    }
-
-    public function update()
-    {
-        $sessionRepo = new \Repository\SessionRepo();
-        $sessionRepo->update($this);
     }
 }

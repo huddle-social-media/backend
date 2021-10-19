@@ -29,7 +29,7 @@ class DatabaseObject
 
     public static function MapRelationToObject($type, $query, $params)
     {
-        $res = self::runReadQuery($query, $params);
+        $res = self::readQuery($query, $params);
 
         $res->setFetchMode(\PDO::FETCH_CLASS, '\\Models\\'.$type);
         
@@ -125,11 +125,16 @@ class DatabaseObject
         $query = "INSERT INTO `".$DbTableName."`(".$attrString.") VALUES(".$parmsString.");";
         try
         {
+            self::$writeConn->beginTransaction();
             $stmt = self::$writeConn->prepare($query);
             $stmt->execute($values);
+            $id = self::$writeConn->lastInsertId();
+            self::$writeConn->commit();
+
         }catch(\PDOException $ex)
         {
             error_log('Error running query - '.$ex, 0);
+            self::$writeConn->rollBack();
             $response = new \Helpers\Response();
             $response->setSuccess(false);
             $response->setHttpStatusCode(500);
@@ -139,19 +144,19 @@ class DatabaseObject
         }
         
 
-        return self::$writeConn->lastInsertId();
+        return $id;
 
 
     }
 
     public static function checkQuery($query, $params)
     {
-        $res = self::runReadQuery($query, $params);
+        $res = self::readQuery($query, $params);
 
         return $res->rowCount();
     }
 
-    private static function runReadQuery($query, $params)
+    private static function readQuery($query, $params)
     {
         if(self::$readConn === null)
         {
@@ -175,6 +180,84 @@ class DatabaseObject
         }
 
         return $res;
+    }
+
+    public static function UpdateObjectInRelation($object, $keys)
+    {
+
+        $DbTableName = $object->getDbTable();
+
+        $attributes = [];
+        $values = [];
+        $params = [];
+
+
+        $array = self::objectToArray($object);
+
+        foreach($array as $key=>$value)
+        {
+            
+            if(!is_array($value) && $value != NULL && $key != "dbTable")
+            {
+                $attributes[] = $key;
+                $values[] = $value;
+                $params[] = '?';
+
+            }
+        }
+        $valueString = "";
+        $whereString = "";
+        
+        for($i = 0; $i < count($attributes); $i++)
+        {
+            if(in_array($attributes[$i], $keys))
+            {
+                $whereString = $whereString."$attributes[$i] = $values[$i] &&";
+                unset($values[$i]);
+                $values = array_values($values);
+
+            }else
+            {
+                $valueString = $valueString."$attributes[$i] = ?, ";
+            }
+            
+        }
+
+        $whereString = substr($whereString, 0, strlen($whereString)- 3);
+        $valueString = substr($valueString, 0, strlen($valueString) - 2);
+
+        if(self::$writeConn == NULL)
+        {
+            self::startConnection();
+        }
+
+        $query = "UPDATE `".$DbTableName."` SET $valueString WHERE $whereString;";
+
+        try
+        {
+            self::$writeConn->beginTransaction();
+            $stmt = self::$writeConn->prepare($query);
+            $stmt->execute($values);
+            $id = self::$writeConn->lastInsertId();
+            self::$writeConn->commit();
+
+        }catch(\PDOException $ex)
+        {
+            error_log('Error running query - '.$ex, 0);
+            self::$writeConn->rollBack();
+            $response = new \Helpers\Response();
+            $response->setSuccess(false);
+            $response->setHttpStatusCode(500);
+            $response->addMessage("Database Error");
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        }
+        
+
+        return $id;
+
+
     }
 
 

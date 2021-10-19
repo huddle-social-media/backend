@@ -3,6 +3,7 @@
 
 namespace Config;
 
+
 class Database
 {
     private static $writeHost = 'localhost';
