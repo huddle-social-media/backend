@@ -1,12 +1,7 @@
 <?php
 
 
-require_once __DIR__."/../router/Router.php";
-require_once __DIR__."/../controllers/userControllers/UserController.php";
-require_once __DIR__."/../controllers/userControllers/CasualController.php";
-require_once __DIR__."/../controllers/userControllers/CelebrityController.php";
-require_once __DIR__."/../controllers/userControllers/OrganizationController.php";
-require_once __DIR__."/../auth/controllers/AuthController.php";
+require_once __DIR__."/../helpers/autoLoader/autoLoader.php";
 
 Router\Router::get("/", function(){
     echo "<h1>RooT</h1>";

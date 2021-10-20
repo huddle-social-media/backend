@@ -8,4 +8,5 @@ class UserStatus
     public $status;
     public $login_attempts;
     public $type;
+
 }

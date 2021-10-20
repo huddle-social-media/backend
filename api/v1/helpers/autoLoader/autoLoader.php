@@ -19,7 +19,12 @@ spl_autoload_register(function ($className)
         'models/content/',
         'models/users/',
         'repository/ORM/',
-        'router/'
+        'router/',
+        'auth/controllers/',
+        'auth/services/authentication/',
+        'auth/services/authorization/',
+        'models/sessions/',
+        'models/abstract/'
     );
     
     //for each directory

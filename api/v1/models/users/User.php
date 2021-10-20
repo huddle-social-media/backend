@@ -4,37 +4,33 @@ namespace Models;
 
 use Exception;
 
-require_once __DIR__."/../../helpers/PasswordHandler/PasswordHandler.php";
+require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 use \Helpers\PasswordHandler as PasswordHandler;
 
-abstract class User
+class User extends HuddleObj
 {
-    private $userId = null;
+    private $user_id = null;
     private $username;
     private $email;
     private $interest;
     private $banned = false;
-    private $loginAttempts = 0;
-    private $loggedIn = false;
+    private $login_attempts = 0;
+    private $logged_in = false;
     protected $status;
     protected $type;
     protected $password;
 
+    
+    protected $dbTable = 'user';
+    protected $primaryKeysArray = ['user_id'];
 
-    public function __construct($username, $email, $interest, $password)
+    
+    public function setUserId($user_id)
     {
-        $this->setUsername($username);
-        $this->setEmail($email);
-        $this->setInterest($interest);
-        $this->setPassword($password);
-    }
-
-    public function setUserId($userId)
-    {
-        if(($userId !== null) && (!is_numeric($userId) || $userId <= 0 || $userId > 9223372036854775807 || $this->userId !== null))
+        if(($user_id !== null) && (!is_numeric($user_id) || $user_id <= 0 || $user_id > 9223372036854775807 || $this->user_id !== null))
             throw new Exception("Can not set the user ID");
-        $this->userId = $userId;
+        $this->user_id = $user_id;
     }
 
     public function setUsername($username)
@@ -51,6 +47,11 @@ abstract class User
         $this->password = $password;
     }
 
+    public function unsetPassword()
+    {
+        $this->password = null;
+    }
+
     public function setEmail($email)
     {
         // need to verify the email before use
@@ -63,7 +64,7 @@ abstract class User
     {
         if(!is_bool($loginStatus))
             throw new Exception("Can not change the login status");
-        $this->loggedIn = $loginStatus;
+        $this->logged_in = $loginStatus;
     }
 
     public function setInterest($interest)
@@ -73,9 +74,14 @@ abstract class User
         $this->interest = $interest;
     }
 
-    public function setBanned()
+    public function setBanned($status)
     {
-        $this->banned = !$this->banned;
+        $this->banned = $status;
+    }
+
+    public function getBannedStatus()
+    {
+        return $this->banned;
     }
 
     public function setLoginAttempts()
@@ -85,7 +91,7 @@ abstract class User
 
     public function getUserId()
     {
-        return $this->userId;
+        return $this->user_id;
     }
 
     public function getUsername()
@@ -105,12 +111,12 @@ abstract class User
 
     public function getLoggedIn()
     {
-        return $this->loggedIn;
+        return $this->logged_in;
     }
 
     public function getLoginAttempts()
     {
-        return $this->loginAttempts;
+        return $this->login_attempts;
     }
 
     public function getHashedPassword()
@@ -127,8 +133,4 @@ abstract class User
     {
         return $this->type;
     }
-
-    abstract public function setType($type);
-    abstract public function setStatus($status);
-    abstract public function create();
 }

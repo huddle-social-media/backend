@@ -89,7 +89,7 @@ class DatabaseObject
     }
 
     // ########### UNDER TESTING ############# (Have to add exceptions)
-    public static function MapObjectToRelation($object)
+    public static function MapObjectToRelation(\Models\HuddleObj $object)
     {
 
         $DbTableName = $object->getDbTable();
@@ -182,11 +182,11 @@ class DatabaseObject
         return $res;
     }
 
-    public static function UpdateObjectInRelation($object, $keys)
+    public static function UpdateObjectInRelation(\Models\HuddleObj $object)
     {
 
         $DbTableName = $object->getDbTable();
-
+        $keys = $object->getPrimaryKeysArray();
         $attributes = [];
         $values = [];
         $params = [];

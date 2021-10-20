@@ -9,13 +9,13 @@ class Database
     private static $writeHost = 'localhost';
     private static $writeUsername = 'root';
     private static $writePassword = '';
-    private static $writeDbName = 'huddle_test';
+    private static $writeDbName = 'huddle_test1';
     private static $writeCharset = 'utf8';
 
     private static $readHost = 'localhost';
     private static $readUsername = 'root';
     private static $readPassword = '';
-    private static $readDbName = 'huddle_test';
+    private static $readDbName = 'huddle_test1';
     private static $readCharset = 'utf8';
 
     private static $writeDBConnection;

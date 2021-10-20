@@ -81,7 +81,7 @@ class AuthController
      */
     private static function authRequestedClient($res, $session, $payload)//, $authRepo)
     {
-        if(!property_exists($payload, 'userId') || !is_numeric($payload->userId) || $payload->userId < 0){
+        if(!property_exists($payload, 'user_id') || !is_numeric($payload->user_id) || $payload->user_id < 0){
             $res->setSuccess(false);
             $res->setHttpStatusCode(401);
             $res->addMessage("credentials not found");
@@ -89,7 +89,7 @@ class AuthController
             exit;
         }
 
-        if($session->getUserId() !== $payload->userId)
+        if($session->getUserId() !== $payload->user_id)
         {
             $res->setSuccess(false);
             $res->setHttpStatusCode(401);
@@ -267,7 +267,7 @@ class AuthController
             $payload = self::authAccessToken($req, $res, $authorizationService);
             //self::authRequestedClient($res, $session, $payload, $authRepo);
             self::authRequestedClient($res, $session, $payload);
-            call_user_func_array($next, [$req, $res, $payload->userId]);
+            call_user_func_array($next, [$req, $res, $payload->user_id]);
         }catch(\PDOException $ex){
             $res->setSuccess(false);
             $res->setHttpStatusCode(500);
@@ -289,13 +289,12 @@ class AuthController
         try{
             $authorizationService = new \Services\Authorization();
             $authenticateService = new \Services\Authentication();
-            $authRepo = new \Repository\AuthRepo();
-            $session = self::authRefreshToken($req, $res, $authenticateService, $authRepo);
+            $session = self::authRefreshToken($req, $res, $authenticateService);
             self::checkAccessToken($req, $res, $authorizationService);
             $segments = explode('.', $authorizationService->extractAccessToken($req->httpAuth()));
             $header = (array)json_decode(\Helpers\JWT::urlSafeBase64Decode($segments[0]));
             $payload = (array)json_decode(\Helpers\JWT::urlSafeBase64Decode($segments[1]));
-            self::authRequestedClient($res, $session, (object)$payload, $authRepo);
+            self::authRequestedClient($res, $session, (object)$payload);
             $payload['exp'] = time()+30;
             $newAccessToken = \Helpers\JWT::encode($payload, $authorizationService->getSecretKey(), $header['alg'], $header);
             // send the access token and the refresh token
@@ -305,7 +304,8 @@ class AuthController
             $res->setHttpStatusCode(200);
             $res->setData(['accessToken' => $newAccessToken]);
             $res->addMessage("Access grant");
-            $session->update();
+            echo "Hello";
+            \Repository\ORM\ORM::updateObject($session,['session_id']);
             $res->send();
             exit;
         }catch(\PDOException $ex){

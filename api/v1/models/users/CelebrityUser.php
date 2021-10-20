@@ -4,8 +4,7 @@ namespace Models;
 
 use Exception;
 
-require_once __DIR__."/User.php";
-require_once __DIR__."/../../repository/usersRepo/CelebirtyUserRepo.php";
+require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 class CelebrityUser extends User
 {
@@ -15,15 +14,23 @@ class CelebrityUser extends User
     private $dob;
     private $gender;
 
-    public function __construct($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password)
+    public static function create()
     {
-        parent::__construct($username, $email, $interest, $password);
+        return new self();
+    }
+
+    public function initialize($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password)
+    {
         $this->setFirstname($firstname);
         $this->setLastname($lastname);
         $this->setType($type);
         $this->setGender($gender);
         $this->setDob($year, $month, $day);
         $this->setStatus(self::statusCodes[3]);
+        $this->setUsername($username);
+        $this->setEmail($email);
+        $this->setInterest($interest);
+        $this->setPassword($password);
     }
 
     public function setFirstname($firstname)
@@ -87,13 +94,6 @@ class CelebrityUser extends User
     public function getDob()
     {
         return $this->dob;
-    }
-
-    public function create()
-    {
-        // call the orm for creating the user
-        $celebrityRepo = new \Repository\CelebrityUserRepo();
-        return $celebrityRepo->create($this);
     }
 
 }

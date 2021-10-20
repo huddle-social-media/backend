@@ -2,20 +2,12 @@
 
 namespace Controllers;
 
-require_once __DIR__."/../../helpers/JWT/JWT.php";
-require_once __DIR__."/../../helpers/PasswordHandler/PasswordHandler.php";
-require_once __DIR__."/../../models/users/CasualUser.php";
-require_once __DIR__."/../../models/users/CelebrityUser.php";
-require_once __DIR__."/../../models/users/OrganizationUser.php";
-require_once __DIR__."../../../models/sessions/Session.php";
-require_once __DIR__."/../../auth/services/authorization/Authorization.php";
-
-// not sure yet
-require_once __DIR__."/../../repository/usersRepo/UserRepo.php";
+require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 use Exception;
 use \Helpers\JWT as JWT;
 use \Helpers\PasswordHandler as PasswordHandler;
+use Models\CasualUser;
 use PDOException;
 
 abstract class UserController
@@ -107,8 +99,7 @@ abstract class UserController
         }
 
         try{
-            $userRepo = new \Repository\UserRepo();
-            if($userRepo->checkUsername($body->username))
+            if(\Repository\ORM\ORM::checkUsername($body->username))
             {
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);
@@ -128,8 +119,7 @@ abstract class UserController
         }
 
         try{
-            $userRepo = new \Repository\UserRepo();
-            if($userRepo->checkEmail($body->email))
+            if(\Repository\ORM\ORM::checkEmail($body->email))
             {
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);
@@ -174,8 +164,8 @@ abstract class UserController
         if($type === 'casual')
         {
             try{
-                $casualUser = new \Models\CasualUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
-                $casualUser = $casualUser->create();
+                $casualUser = \Models\CasualUser::create();
+                $casualUser->initialize($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);
                 $res->addMessage("User created successfully");
@@ -193,8 +183,8 @@ abstract class UserController
         }else if($type === 'celebrity')
         {
             try{
-                $celebrityUser = new \Models\CelebrityUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
-                $celebrityUser = $celebrityUser->create();
+                $celebrityUser = \Models\CelebrityUser::create();
+                $celebrityUser->initialize($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);
                 $res->addMessage("User created successfully");
@@ -255,8 +245,7 @@ abstract class UserController
         }
 
         try{
-            $userRepo = new \Repository\UserRepo();
-            if(!$userRepo->checkEmail($body->email))
+            if(!\Repository\ORM\ORM::checkEmail($body->email))
             {
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);
@@ -264,12 +253,12 @@ abstract class UserController
                 $res->send();
                 exit;
             }
-
+            
             $email = $body->email;
             $password = $body->password;
-            $user = $userRepo->getUser($email);
+            $user = \Repository\ORM\ORM::makeUserByEmail($email, 'User');
 
-            if($user->banned === true)
+            if($user->getBannedStatus() === true)
             {
                 // redirected to banned page
                 $res->setSuccess(false);
@@ -279,7 +268,7 @@ abstract class UserController
                 exit;
             }
 
-            if($user->status === 'locked')
+            if($user->getStatus() === 'locked')
             {
                 // redirect to locked page
                 $res->setSuccess(false);
@@ -289,7 +278,7 @@ abstract class UserController
                 exit;
             }
 
-            if($user->status === 'unverified')
+            if($user->getStatus() === 'unverified')
             {
                 // redirect to unverified page
                 $res->setSuccess(false);
@@ -299,7 +288,7 @@ abstract class UserController
                 exit;
             }
 
-            if($user->loginAttempts >= 5)
+            if($user->getLoginAttempts() >= 5)
             {
                 // redirect to locked page
                 $res->setSuccess(false);
@@ -309,7 +298,7 @@ abstract class UserController
                 exit;
             }
 
-            if(!password_verify($password, $user->password))
+            if(!password_verify($password, $user->getHashedPassword()))
             {
                 // redirect to login failed
                 $res->setSuccess(false);
@@ -323,23 +312,24 @@ abstract class UserController
             $accessExp = time()+30;
 
             $payload = [
-                "userId" => $user->userId,
+                "user_id" => $user->getUserId(),
                 "exp" => $accessExp,
-                "aud" => $user->type
+                "aud" => $user->getType()
             ];
 
             $authorizationService = new \Services\Authorization();
             $accessToken = JWT::encode($payload, $authorizationService->getSecretKey(), 'HS256');
             $refreshToken = base64_encode(bin2hex(openssl_random_pseudo_bytes(32).time()));
-            $session = new \Models\Session($user->userId, $refreshToken, $refreshExp);
+            $session = \Models\Session::create();
+            $session->initialize($user->getUserId(), $refreshToken, $refreshExp);        
+            \Repository\ORM\ORM::writeObject($session);
             setcookie('refreshToken', $refreshToken, $refreshExp, '/', null, false, true);
-
             $res->setSuccess(true);
             $res->setHttpStatusCode(200);
             $res->addMessage("Login succes");
-            unset($user->password);
-            $res->setData(["accessToken" => $accessToken, "user" => $user]);
-            $session->create();
+            $user->unsetPassword();
+            $userArray = \Repository\ORM\DatabaseObject::objectToArray($user);
+            $res->setData(["accessToken" => $accessToken, "user" => $userArray]);
             $res->send();
             exit;
         }catch(PDOException $ex) {
@@ -357,7 +347,7 @@ abstract class UserController
     public static function checkUsername($req, $res)
     {
 
-        if($body = $req->body())
+        if(!($body = $req->body()))
         {
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
@@ -395,8 +385,7 @@ abstract class UserController
 
         $username = $body->username;
         try{
-            $userRepo = new \Repository\UserRepo();
-            if($userRepo->checkUsername($username))
+            if(\Repository\ORM\ORM::checkUsername($username))
             {
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);

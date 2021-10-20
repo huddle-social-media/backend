@@ -13,15 +13,21 @@ class ORM
         return DatabaseObject::MapRelationToObject('User', $query, ['%'.$name.'%']); 
     }
 
-    public static function makeCasualUser(int $id)
+    public static function makeUserById(int $id, $type)
     {
         $query = "SELECT * FROM user WHERE userId = ?;";
-        return DatabaseObject::MapRelationToObject('CasualUser', $query, [$id]); 
+        return DatabaseObject::MapRelationToObject($type, $query, [$id]); 
+    }
+
+    public static function makeUserByEmail(string $email, $type)
+    {
+        $query = "SELECT * FROM user WHERE email = ?;";
+        return DatabaseObject::MapRelationToObject($type, $query, [$email]); 
     }
 
     public static function makeUserStatus(int $id)
     {
-        $query = "SELECT * FROM user WHERE userId = ?;";
+        $query = "SELECT * FROM user WHERE user_id = ?;";
         return DatabaseObject::MapRelationToObject('UserStatus', $query, [$id]); 
     }
 
@@ -55,7 +61,7 @@ class ORM
 
     public static function makeSession($refreshToken)
     {
-        $query = "SELECT * FROM `session` WHERE refreshToken = ?";
+        $query = "SELECT * FROM `session` WHERE refresh_token = ?";
         return DatabaseObject::MapRelationToObject('Session', $query, [$refreshToken]);
     }
 

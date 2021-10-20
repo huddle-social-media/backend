@@ -5,7 +5,7 @@ require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 use PDOException;
 
-class Post
+class Post extends HuddleObj
 {
 
     // DB attributes
@@ -32,29 +32,23 @@ class Post
     private $likeObjects = [];
     private $commentObjects = [];
 
-    // The relation that stores object info in DB
-    private $dbTable = 'post';
+    // Attributes needed for ORM
+    protected $dbTable = 'post';
+    protected $primaryKeysArray = ['post_id'];
 
-   /**
-    * Generates a Post Object to work with.
-    */
-    public static function create()
-    {
-        return new self();
-    }
 
-    public function initialize($userId, $status, $embeddedMedia, $mediaType, $mediaCount, $description, $hashtags, $interests, $dateTime, $privacyStatus)
+    public function initialize($user_id, $status, $embedded_media, $media_type, $media_count, $description, $hashtags, $interests, $date_time, $privacy_status)
     {
-        $this->setUserId($userId);
+        $this->setUserId($user_id);
         $this->setStatus($status);
-        $this->setEmbeddedMedia($embeddedMedia);
-        $this->setMediaType($mediaType);
-        $this->setMediaCount($mediaCount);
+        $this->setEmbeddedMedia($embedded_media);
+        $this->setMediaType($media_type);
+        $this->setMediaCount($media_count);
         $this->setDescription($description);
         $this->setHashtags($hashtags);
         $this->setInterests($interests);
-        $this->setDateTime($dateTime);
-        $this->setPrivacyStatus($privacyStatus);
+        $this->setDateTime($date_time);
+        $this->setPrivacyStatus($privacy_status);
         // $this->setMentions($mentions);
         // $this->setLikes($likes);
         // $this->setComments($comments);
@@ -137,22 +131,18 @@ class Post
         return $this->comments;
     }
 
-    public function getDbTable()
-    {
-        return $this->dbTable;
-    }
 
 
 
     // Setters
-    public function setPostId($postId)
+    public function setPostId($post_id)
     {
-        $this->post_id = $postId;
+        $this->post_id = $post_id;
     }
 
-    public function setUserId($userId)
+    public function setUserId($user_id)
     {
-        $this->user_id = $userId;
+        $this->user_id = $user_id;
     }
 
     public function setStatus($status)
@@ -160,19 +150,19 @@ class Post
         $this->status = $status;
     }
 
-    public function setEmbeddedMedia($embeddedMedia)
+    public function setEmbeddedMedia($embedded_media)
     {
-        $this->embedded_media = $embeddedMedia;
+        $this->embedded_media = $embedded_media;
     }
 
-    public function setMediaType($mediaType)
+    public function setMediaType($media_type)
     {
-        $this->media_type = $mediaType;
+        $this->media_type = $media_type;
     }
 
-    public function setMediaCount($mediaCount)
+    public function setMediaCount($media_count)
     {
-        $this->media_count = $mediaCount;
+        $this->media_count = $media_count;
     }
 
     public function setDescription($description)
@@ -190,14 +180,14 @@ class Post
         $this->interests = $interests;
     }
 
-    public function setDateTime($dateTime)
+    public function setDateTime($date_time)
     {
-        $this->date_time = $dateTime;
+        $this->date_time = $date_time;
     }
 
-    public function setPrivacyStatus($privacyStatus)
+    public function setPrivacyStatus($privacy_status)
     {
-        $this->privacy_status = $privacyStatus;
+        $this->privacy_status = $privacy_status;
     }
 
     public function setMentions($mentions)

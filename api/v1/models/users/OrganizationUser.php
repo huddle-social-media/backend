@@ -4,8 +4,7 @@ namespace Models;
 
 use Exception;
 
-require_once __DIR__."/User.php";
-require_once __DIR__."/../../repository/usersRepo/OrganizationUserRepo.php";
+require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 class OrganizationUser extends User
 {
@@ -14,14 +13,22 @@ class OrganizationUser extends User
     private $doe;
     private $location;
 
-    public function __construct($organizationName, $username, $type, $email, $interest, $year, $month, $day, $location, $password)
+    public static function create()
     {
-        parent::__construct($username, $email, $interest, $password);
+        return new self();
+    }
+
+    public function initialize($organizationName, $username, $type, $email, $interest, $year, $month, $day, $location, $password)
+    {
         $this->setDoe($year, $month, $day);
         $this->setLocation($location);
         $this->setOrganizationName($organizationName);
         $this->setType($type);
         $this->setStatus(self::statusCodes[3]);
+        $this->setUsername($username);
+        $this->setEmail($email);
+        $this->setInterest($interest);
+        $this->setPassword($password);
 
     }
 
@@ -81,13 +88,6 @@ class OrganizationUser extends User
     public function getLocation()
     {
         return $this->location;
-    }
-
-    public function create()
-    {
-        // call the orm for creating the user
-        $organizationRepo = new \Repository\OrganizationUserRepo();
-        return $organizationRepo->create($this); 
     }
 
 }

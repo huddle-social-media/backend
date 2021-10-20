@@ -2,11 +2,7 @@
 
 namespace Controllers;
 
-require_once __DIR__."/../../helpers/JWT/JWT.php";
-require_once __DIR__."/../../helpers/PasswordHandler/PasswordHandler.php";
-require_once __DIR__."/../../models/users/OrganizationUser.php";
-require_once __DIR__."/UserController.php";
-require_once __DIR__."/../../repository/usersRepo/UserRepo.php";
+require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 use Exception;
 use \Helpers\JWT as JWT;
@@ -101,8 +97,7 @@ class OrganizationController extends UserController
         }
 
         try{
-            $userRepo = new \Repository\UserRepo();
-            if($userRepo->checkUsername($body->username))
+            if(\Repository\ORM\ORM::checkUsername($body->username))
             {
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);
@@ -122,8 +117,7 @@ class OrganizationController extends UserController
         }
 
         try{
-            $userRepo = new \Repository\UserRepo();
-            if($userRepo->checkEmail($body->email))
+            if(\Repository\ORM\ORM::checkEmail($body->email))
             {
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);

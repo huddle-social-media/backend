@@ -6,77 +6,79 @@ require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 use Exception;
 
-class Session
+class Session extends HuddleObj
 {
-    private $sessionId;
-    private $userId;
-    private $refreshToken;
-    private $expirationTime;
+    private $session_id;
+    private $user_id;
+    private $refresh_token;
+    private string $expiration_time;
+    protected $dbTable = 'session';
+    protected $primaryKeysArray = ['session_id'];
 
-   
-    public static function create()
+
+    public function initialize($user_id, $refresh_token, $expiration_time)
     {
-        return new self();
+        $this->setUserId($user_id);
+        $this->setRefreshToken($refresh_token);
+        $this->setExpirationTime($expiration_time);
     }
 
-    public function initialize($userId, $refreshToken, $expirationTime)
+    public function setUserId($user_id)
     {
-        $this->setUserId($userId);
-        $this->setRefreshToken($refreshToken);
-        $this->setExpirationTime($expirationTime);
-    }
-
-    public function setUserId($userId)
-    {
-        if(($userId !== null) && (!is_numeric($userId) || $userId <= 0 || $userId > 9223372036854775807 || $this->userId !== null))
+        if(($user_id !== null) && (!is_numeric($user_id) || $user_id <= 0 || $user_id > 9223372036854775807 || $this->user_id !== null))
             throw new Exception("Can not set the user ID");
-        $this->userId = $userId;
+        $this->user_id = $user_id;
     }
 
-    public function setSessionId($sessionId)
+    public function setSessionId($session_id)
     {
-        if(($sessionId !== null) && (!is_numeric($sessionId) || $sessionId <= 0 || $sessionId > 9223372036854775807 || $this->sessionId !== null))
+        if(($session_id !== null) && (!is_numeric($session_id) || $session_id <= 0 || $session_id > 9223372036854775807 || $this->session_id !== null))
             throw new Exception("Can not set the session ID");
-        $this->sessionId = $sessionId;
+        $this->session_id = $session_id;
     }
 
-    public function setRefreshToken($refreshToken)
+    public function setRefreshToken($refresh_token)
     {
-        if(strlen($refreshToken) < 1 || strlen($refreshToken) > 255)
+        if(strlen($refresh_token) < 1 || strlen($refresh_token) > 255)
             throw new Exception("Can not set the refresh token");
-        $this->refreshToken = $refreshToken;
+        $this->refresh_token = $refresh_token;
     }
 
-    public function setExpirationTime($expirationTime)
+    public function setExpirationTime($expiration_time)
     {
-        if(!is_numeric($expirationTime) || $expirationTime < 0)
+        if(!is_numeric($expiration_time) || $expiration_time < 0)
             throw new Exception('Can not set the expiration time');
-        $this->expirationTime = $expirationTime;
+        $this->expiration_time = date('y/m/d H:i:s', $expiration_time);
     }
 
     public function getSessionId()
     {
-        return $this->sessionId;
+        return $this->session_id;
     }
 
     public function getUserId()
     {
-        return $this->userId;
+        return $this->user_id;
     }
 
     public function getRefreshToken()
     {
-        return $this->refreshToken;
+        return $this->refresh_token;
     }
 
     public function getExpirationTime()
     {
-        return $this->expirationTime;
+        return $this->expiration_time;
+    }
+
+    public function getExpirationTimeInUnix()
+    {
+        return strtotime($this->expiration_time);
     }
 
     public function isExpired()
     {
-        if(time() >= $this->expirationTime)
+        if(time() >= $this->expiration_time)
             return true;
         return false;
     }
