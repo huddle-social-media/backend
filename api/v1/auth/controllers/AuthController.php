@@ -2,10 +2,8 @@
 
 namespace Controllers;
 
-require_once __DIR__."/../../repository/AuthRepo/AuthRepo.php";
-require_once __DIR__."/../services/authentication/Authentication.php";
-require_once __DIR__."/../services/authorization/Authorization.php";
-require_once __DIR__."/../../helpers/JWT/JWT.php";
+
+require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 class AuthController
 {
