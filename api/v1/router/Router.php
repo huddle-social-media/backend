@@ -129,7 +129,6 @@ class Router
         
         $route = self::$routeTable[$requestMethod.$requestPath];
         
-
         $req = new Request();
         $res = new Response();
         if($route->secure === true)

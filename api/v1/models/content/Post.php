@@ -54,11 +54,6 @@ class Post extends HuddleObj
         // $this->setComments($comments);
     }
 
-    public function createPost($post)
-    {
-        
-    }
-
     // Getters
     
     public function getPostId()

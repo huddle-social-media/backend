@@ -20,10 +20,11 @@ Router\Router::post("/users/silentAuth", Controllers\AuthController::class."::si
 // secured routes for testing purposes
 Router\Router::get("/users", Controllers\UserController::class."::checkUsername");
 Router\Router::post("/users", Controllers\UserController::class."::sayHello");
+Router\Router::get("/posts/byId/:id", Controllers\PostController::class."::getPostsByUserId");
+Router\Router::post("/posts", Controllers\PostController::class."::createPost");
+Router\Router::post("/tips", Controllers\TipController::class."::createTip");
 
-
+echo "Hello";
 Router\Router::listen(function($port){
     echo "<br><h1>Server up and running on port: $port</h1><br>";
 });
-
-

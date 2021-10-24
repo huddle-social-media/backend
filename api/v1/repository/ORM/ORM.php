@@ -48,10 +48,16 @@ class ORM
         return DatabaseObject::checkQuery($query, [$email]);
     }
 
-    public static function makePost($id)
+    public static function makePost($post_id)
     {
         $query = "SELECT * FROM `post` WHERE post_id = ?;";
-        return DatabaseObject::MapRelationToObject('Post', $query, [$id]);
+        return DatabaseObject::MapRelationToObject('Post', $query, [$post_id]);
+    }
+
+    public static function getPostsListbyUserId($userId ,$privacyStatus ,$numOfPosts)
+    {
+        $query = 'SELECT * FROM `post` WHERE user_id = ? AND privacy_status = ? ORDER BY date_time DESC LIMIT ? ;';
+        return DatabaseObject::MapRelationToObject('Post', $query, [$userId, $privacyStatus, $numOfPosts]);
     }
 
     public static function updateObject($object, $primaryKeysArray)
@@ -63,6 +69,12 @@ class ORM
     {
         $query = "SELECT * FROM `session` WHERE refresh_token = ?";
         return DatabaseObject::MapRelationToObject('Session', $query, [$refreshToken]);
+    }
+
+    public static function makeTip($tip_id)
+    {
+        $query = "SELECT * FROM `tip` WHERE tip_id = ?;";
+        return DatabaseObject::MapRelationToObject('Tip', $query, [$tip_id]);
     }
 
 }
