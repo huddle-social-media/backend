@@ -16,6 +16,8 @@ class Post extends HuddleObj
     private $media_type;
     private $media_count;
     private $description;
+    private $like_count;
+    private $comment_count;
     private $hashtags = [];
     private $interests = [];
     private $date_time;
@@ -37,7 +39,7 @@ class Post extends HuddleObj
     protected $primaryKeysArray = ['post_id'];
 
 
-    public function initialize($user_id, $status, $embedded_media, $media_type, $media_count, $description, $hashtags, $interests, $date_time, $privacy_status)
+    public function initialize($user_id, $status, $embedded_media, $media_type, $media_count, $description, $likeCount, $commentCount, $hashtags, $interests, $date_time, $privacy_status)
     {
         $this->setUserId($user_id);
         $this->setStatus($status);
@@ -49,6 +51,8 @@ class Post extends HuddleObj
         $this->setInterests($interests);
         $this->setDateTime($date_time);
         $this->setPrivacyStatus($privacy_status);
+        $this->setLikeCount($likeCount);
+        $this->setCommentCount(($commentCount));
         // $this->setMentions($mentions);
         // $this->setLikes($likes);
         // $this->setComments($comments);
@@ -126,6 +130,15 @@ class Post extends HuddleObj
         return $this->comments;
     }
 
+    public function getLikeCount()
+    {
+        return $this->like_count;
+    }
+    public function getCommentCount()
+    {
+        return $this->comment_count;
+    }
+
 
 
 
@@ -198,6 +211,16 @@ class Post extends HuddleObj
     public function setComments($comments)
     {
         $this->comments = $comments;
+    }
+
+    public function setLikeCount($likeCount)
+    {
+        $this->like_count = $likeCount;
+    }
+
+    public function setCommentCount($commentCount)
+    {
+        $this->comment_count = $commentCount;
     }
 
 

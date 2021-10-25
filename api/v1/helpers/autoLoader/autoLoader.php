@@ -24,7 +24,8 @@ spl_autoload_register(function ($className)
         'auth/services/authentication/',
         'auth/services/authorization/',
         'models/sessions/',
-        'models/abstract/'
+        'models/abstract/',
+        'models/action/'
     );
     
     //for each directory

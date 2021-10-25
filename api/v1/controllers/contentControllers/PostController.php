@@ -60,7 +60,7 @@ abstract class PostController
 
         $dateTime = date('y/m/d H:i:s', time());
         $post = \Models\Post::create();
-        $post->initialize($userId,'active',  $embeddedMedia, $mediaType,  $mediaCount, $description, $hashtags, $interests, $dateTime, $privacyStatus);
+        $post->initialize($userId,'active',  $embeddedMedia, $mediaType,  $mediaCount, $description,0 ,0 , $hashtags, $interests, $dateTime, $privacyStatus);
         
         $id = \Repository\ORM\ORM::writeObject($post);
         $returnPost = \Repository\ORM\ORM::makePost($id);
@@ -76,13 +76,12 @@ abstract class PostController
     }
 
 
-    public static function getPostsByUserId($req, $res)
+    public static function getPosts($req, $res)
     {
-        echo "Hello";
+
         $body = $req->body();
-        $params = $req->params();
-        $userId = $params[0];
-        $count = $body->postCount;
+        $userId = $body->userId;
+        $count = $body->limit;
         $privacyStatus = $body->privacyStatus;
         
         $postList = \Repository\ORM\ORM::getPostsListbyUserId($userId, $privacyStatus, $count);
@@ -96,10 +95,17 @@ abstract class PostController
         }else
         {
             $returnDataArray = [];
-            foreach($postList as $post)
+
+            if(is_array($postList))
             {
-                $item = \Repository\ORM\DatabaseObject::objectToArray($post);
-                $returnDataArray.array_push($item);
+                for($i = 0; $i < count($postList); $i++)
+                {
+                    $item = \Repository\ORM\DatabaseObject::objectToArray($postList[$i]);
+                    $returnDataArray += [$i => $item];
+                }
+            }else
+            {
+                $returnDataArray = \Repository\ORM\DatabaseObject::objectToArray($postList);
             }
 
             $res->setData($returnDataArray);

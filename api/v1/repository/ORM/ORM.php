@@ -60,9 +60,9 @@ class ORM
         return DatabaseObject::MapRelationToObject('Post', $query, [$userId, $privacyStatus, $numOfPosts]);
     }
 
-    public static function updateObject($object, $primaryKeysArray)
+    public static function updateObject($object)
     {
-        return DatabaseObject::UpdateObjectInRelation($object, $primaryKeysArray);
+        return DatabaseObject::UpdateObjectInRelation($object);
     }
 
     public static function makeSession($refreshToken)
@@ -76,5 +76,38 @@ class ORM
         $query = "SELECT * FROM `tip` WHERE tip_id = ?;";
         return DatabaseObject::MapRelationToObject('Tip', $query, [$tip_id]);
     }
+
+    public static function getTipsListbyUserId($userId ,$numOfTips)
+    {
+        $query = 'SELECT * FROM `tip` WHERE user_id = ? ORDER BY date_time DESC LIMIT ? ;';
+        return DatabaseObject::MapRelationToObject('Tip', $query, [$userId, $numOfTips]);
+    }
+
+    public static function makeFollow($userId, $follower)
+    {
+        $query = "SELECT * FROM `follow` WHERE user_id = ? AND follower = ?;";
+        return DatabaseObject::MapRelationToObject('Follow', $query, [$userId, $follower]);
+    }
+
+    public static function makeLike($postId, $userId){
+        $query ="SELECT * FROM `like` WHERE post_id = ? AND user_id = ?";
+        return DatabaseObject::MapRelationToObject('Like', $query, [$postId, $userId]);
+    }
+    // public static function commentpost($id){
+
+    //     $query="SELECT * FROM `comment` WHERE commetId =?";
+    //     return DatabaseObject::MapRelationToObject('Comment', $query, [$id]);
+    // }
+    public static function getlikeCount($id){
+        $query="SELECT COUNT(*) as total_like_count FROM `like` WHERE post_id=?";
+        $total_like_count = DatabaseObject::runReadQuery($query, [$id]);
+        return $total_like_count['total_like_count'];
+    }
+
+    // public static function Unlike($Unlike){
+
+    //     $query ="DELETE * FROM `like` WHERE post_id=?";
+    //     return DatabaseObject::MapRelationToObject('Like', $query, [$Unlike]);
+    // }
 
 }

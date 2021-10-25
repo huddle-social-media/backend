@@ -63,4 +63,43 @@ abstract class TipController
         $res->send();
         exit;
     }
+
+    public static function getTipsByUser($req, $res)
+    {
+        $body = $req->body();
+        $userId = $body->userId;
+        $count = $body->limit;
+
+        $tipsList = \Repository\ORM\ORM::getTipsListbyUserId($userId, $count);
+        if($tipsList == null)
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(204);
+            $res->addMessage("No tips available");
+            $res->send();
+            exit;
+        }else
+        {
+            $returnDataArray = [];
+            if(is_array($tipsList))
+            {
+                for($i = 0; $i < count($tipsList); $i++)
+                {
+                    $item = \Repository\ORM\DatabaseObject::objectToArray($tipsList[$i]);
+                    $returnDataArray += [$i => $item];
+                }
+            }else
+            {
+                $returnDataArray = \Repository\ORM\DatabaseObject::objectToArray($tipsList);
+            }
+            
+
+            $res->setData($returnDataArray);
+            $res->setSuccess(true);
+            $res->setHttpStatusCode(200);
+            $res->addMessage("Latest $count tips.");
+            $res->send();
+            exit;
+        }
+    }
 }

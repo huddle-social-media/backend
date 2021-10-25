@@ -104,7 +104,7 @@ class DatabaseObject
         foreach($array as $key=>$value)
         {
             
-            if(!is_array($value) && $value != NULL && $key != "dbTable")
+            if(!is_array($value) && $value != NULL && $key != "dbTable" && $key != "primaryKeyArray")
             {
                 $attributes[] = $key;
                 $values[] = $value;
@@ -148,6 +148,23 @@ class DatabaseObject
 
 
     }
+
+    public static function runReadQuery($query, $params)
+    {
+        $res = self::readQuery($query, $params);
+        if($res->rowCount() > 1)
+        {
+            return $res->fetchAll();
+        }else if($res->rowCount() == 1)
+        {
+            return $res->fetch();
+        }else
+        {
+            return null;
+        }
+        
+    }
+
 
     public static function checkQuery($query, $params)
     {
