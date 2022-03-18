@@ -33,7 +33,11 @@ class JWT {
      * 
      * return string encoded input
      */
+<<<<<<< HEAD
     private static function urlSafeBase64Encode(string $input) 
+=======
+    public static function urlSafeBase64Encode(string $input) 
+>>>>>>> origin/master
     {
         return \str_replace('=', '', \strtr(\base64_encode($input), '+/', '-_'));
     }
@@ -46,7 +50,11 @@ class JWT {
      * 
      * return string decoded input
      */
+<<<<<<< HEAD
     private static function urlSafeBase64Decode(string $input)
+=======
+    public static function urlSafeBase64Decode(string $input)
+>>>>>>> origin/master
     {
         $charCount = 4;
         $remain = strlen($input) % $charCount;

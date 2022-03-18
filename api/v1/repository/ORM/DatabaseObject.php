@@ -29,7 +29,11 @@ class DatabaseObject
 
     public static function MapRelationToObject($type, $query, $params)
     {
+<<<<<<< HEAD
         $res = self::runReadQuery($query, $params);
+=======
+        $res = self::readQuery($query, $params);
+>>>>>>> origin/master
 
         $res->setFetchMode(\PDO::FETCH_CLASS, '\\Models\\'.$type);
         
@@ -53,6 +57,7 @@ class DatabaseObject
     }
 
     // ########### UNDER TESTING ############# (Have to add exceptions)
+<<<<<<< HEAD
     public static function objectToArray($data) {
         $className = "";
         if(is_object($data))
@@ -90,6 +95,92 @@ class DatabaseObject
 
     // ########### UNDER TESTING ############# (Have to add exceptions)
     public static function MapObjectToRelation($object)
+=======
+    // public static function objectToArray($data) {
+    //     $className = "";
+    //     if(is_object($data))
+    //     {
+    //         $className = get_class($data);
+    //     }
+    //     if ((! is_array($data)) and (! is_object($data)))
+    //         return $data; 
+    
+    //     $result = array();
+    
+    //     $data = (array) $data;
+    //     foreach ($data as $key => $value) {
+    //         if($className !== "")
+    //         {
+    //             $pos = strpos($key, $className);
+    //             if($pos != false)
+    //             {
+    //                 $key = substr($key, $pos + strlen($className));
+    //             }
+                
+    //         }
+    //         $key = str_replace('*', '', $key);
+    //         $key = preg_replace('/[\x00-\x1F\x7F]/', '', $key);     // removes hidden characters that interfere with checking
+    //         if (is_object($value))
+    //             $value = (array) $value;
+    //         if (is_array($value))
+    //             $result[$key] = self::objectToArray($value);
+    //         else
+    //             $result[$key] = $value;
+    //     }
+
+    //     return $result;
+    // }
+
+    public static function objectToArray($object, $array, $ref = NULL)
+    {
+        $className = "";
+        if($ref)
+        {
+            $className = get_class($ref);
+        }
+        elseif(is_object($object))
+        {
+            $className = get_class($object);
+        }
+        
+        $rc = new \ReflectionClass($className);
+        $props = $rc->getProperties();
+        $attributes = [];
+        //$values = [];
+        
+
+        foreach($props as $name=>$value)
+        {
+            $attributes[] =  $value->getName();
+        }
+
+        foreach($attributes as $attribute)
+        {
+            $method = $attribute;
+            $method = ucwords($method, "_");
+            $method = str_replace("_", "", $method);
+            $method = "get".$method;
+            $value = $object->$method();
+            //$values[] = $value;
+            $array[$attribute] = $value;
+        }
+
+        
+
+        $parentClass = $rc->getParentClass();
+        
+
+        if($className != $parentClass->getName() && $parentClass->getName() != "Models\HuddleObj")
+        {
+            return self::objectToArray($object,$array,$parentClass->getName()::create());
+        }
+
+        return $array;
+    }
+
+    // ########### UNDER TESTING ############# (Have to add exceptions)
+    public static function MapObjectToRelation(\Models\HuddleObj $object)
+>>>>>>> origin/master
     {
 
         $DbTableName = $object->getDbTable();
@@ -99,12 +190,20 @@ class DatabaseObject
         $params = [];
 
 
+<<<<<<< HEAD
         $array = self::objectToArray($object);
+=======
+        $array = self::objectToArray($object, []);
+>>>>>>> origin/master
 
         foreach($array as $key=>$value)
         {
             
+<<<<<<< HEAD
             if(!is_array($value) && $value != NULL && $key != "dbTable")
+=======
+            if($value != NULL && $key != "dbTable" && $key != "primaryKeysArray")
+>>>>>>> origin/master
             {
                 $attributes[] = $key;
                 $values[] = $value;
@@ -123,6 +222,7 @@ class DatabaseObject
         }
 
         $query = "INSERT INTO `".$DbTableName."`(".$attrString.") VALUES(".$parmsString.");";
+<<<<<<< HEAD
         try
         {
             $stmt = self::$writeConn->prepare($query);
@@ -130,6 +230,22 @@ class DatabaseObject
         }catch(\PDOException $ex)
         {
             error_log('Error running query - '.$ex, 0);
+=======
+        
+        try
+        {
+            
+            self::$writeConn->beginTransaction();
+            $stmt = self::$writeConn->prepare($query);
+            $stmt->execute($values);
+            $id = self::$writeConn->lastInsertId();
+            self::$writeConn->commit();
+
+        }catch(\PDOException $ex)
+        {
+            error_log('Error running query - '.$ex, 0);
+            self::$writeConn->rollBack();
+>>>>>>> origin/master
             $response = new \Helpers\Response();
             $response->setSuccess(false);
             $response->setHttpStatusCode(500);
@@ -139,6 +255,7 @@ class DatabaseObject
         }
         
 
+<<<<<<< HEAD
         return self::$writeConn->lastInsertId();
 
 
@@ -147,11 +264,42 @@ class DatabaseObject
     public static function checkQuery($query, $params)
     {
         $res = self::runReadQuery($query, $params);
+=======
+        return $id;
+
+
+    }
+
+    public static function runReadQuery($query, $params)
+    {
+        $res = self::readQuery($query, $params);
+        if($res->rowCount() > 1)
+        {
+            return $res->fetchAll();
+        }else if($res->rowCount() == 1)
+        {
+            return $res->fetch();
+        }else
+        {
+            return null;
+        }
+        
+    }
+
+
+    public static function checkQuery($query, $params)
+    {
+        $res = self::readQuery($query, $params);
+>>>>>>> origin/master
 
         return $res->rowCount();
     }
 
+<<<<<<< HEAD
     private static function runReadQuery($query, $params)
+=======
+    private static function readQuery($query, $params)
+>>>>>>> origin/master
     {
         if(self::$readConn === null)
         {
@@ -177,5 +325,86 @@ class DatabaseObject
         return $res;
     }
 
+<<<<<<< HEAD
+=======
+    public static function UpdateObjectInRelation(\Models\HuddleObj $object)
+    {
+
+        $DbTableName = $object->getDbTable();
+        $keys = $object->getPrimaryKeysArray();
+        $attributes = [];
+        $values = [];
+        $params = [];
+
+
+        $array = self::objectToArray($object, []);
+
+        foreach($array as $key=>$value)
+        {
+            
+            if(!is_array($value) && $value != NULL && $key != "dbTable" && $key != "primaryKeysArray")
+            {
+                $attributes[] = $key;
+                $values[] = $value;
+                $params[] = '?';
+
+            }
+        }
+        $valueString = "";
+        $whereString = "";
+        
+        for($i = 0; $i < count($attributes); $i++)
+        {
+            if(in_array($attributes[$i], $keys))
+            {
+                $whereString = $whereString."$attributes[$i] = $values[$i] &&";
+                unset($values[$i]);
+                $values = array_values($values);
+
+            }else
+            {
+                $valueString = $valueString."$attributes[$i] = ?, ";
+            }
+            
+        }
+
+        $whereString = substr($whereString, 0, strlen($whereString)- 3);
+        $valueString = substr($valueString, 0, strlen($valueString) - 2);
+
+        if(self::$writeConn == NULL)
+        {
+            self::startConnection();
+        }
+
+        $query = "UPDATE `".$DbTableName."` SET $valueString WHERE $whereString;";
+
+        try
+        {
+            self::$writeConn->beginTransaction();
+            $stmt = self::$writeConn->prepare($query);
+            $stmt->execute($values);
+            $id = self::$writeConn->lastInsertId();
+            self::$writeConn->commit();
+
+        }catch(\PDOException $ex)
+        {
+            error_log('Error running query - '.$ex, 0);
+            self::$writeConn->rollBack();
+            $response = new \Helpers\Response();
+            $response->setSuccess(false);
+            $response->setHttpStatusCode(500);
+            $response->addMessage("Database Error");
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        }
+        
+
+        return $id;
+
+
+    }
+
+>>>>>>> origin/master
 
 }

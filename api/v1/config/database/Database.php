@@ -2,6 +2,11 @@
 
 
 namespace Config;
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> origin/master
 class Database
 {
     private static $writeHost = 'localhost';
