@@ -8,8 +8,8 @@ require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 class OrganizationUser extends User
 {
-    private const statusCodes = ['active', 'deactive', 'locked', 'unverified'];
-    private $organizationName;
+    protected const statusCodes = ['active', 'deactive', 'locked', 'unverified'];
+    private $organization_name;
     private $doe;
     private $location;
 
@@ -18,13 +18,13 @@ class OrganizationUser extends User
         return new self();
     }
 
-    public function initialize($organizationName, $username, $type, $email, $interest, $year, $month, $day, $location, $password)
+    public function initialize($organizationName, $username, $email, $interest, $year, $month, $day, $location, $password, $status = self::statusCodes[3])
     {
         $this->setDoe($year, $month, $day);
         $this->setLocation($location);
         $this->setOrganizationName($organizationName);
-        $this->setType($type);
-        $this->setStatus(self::statusCodes[3]);
+        $this->setType("organization");
+        $this->setStatus($status);
         $this->setUsername($username);
         $this->setEmail($email);
         $this->setInterest($interest);
@@ -36,7 +36,7 @@ class OrganizationUser extends User
     {
         if(strlen($organizationName) < 1 || strlen($organizationName) > 255)
             throw new Exception("Can not set the organization name");
-        $this->organizationName = $organizationName;
+        $this->organization_name = $organizationName;
     }
 
     public function setLocation($location)
@@ -77,7 +77,7 @@ class OrganizationUser extends User
 
     public function getOrganizationName()
     {
-        return $this->organizationName;
+        return $this->organization_name;
     }
 
     public function getDoe()

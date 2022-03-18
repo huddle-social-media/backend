@@ -16,6 +16,7 @@ spl_autoload_register(function ($className)
         'helpers/JWT/',
         'helpers/Response/',
         'helpers/Request/',
+        'helpers/PasswordHandler/',
         'models/content/',
         'models/users/',
         'repository/ORM/',

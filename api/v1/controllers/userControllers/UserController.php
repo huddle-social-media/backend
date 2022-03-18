@@ -353,8 +353,9 @@ abstract class UserController
             $res->setSuccess(true);
             $res->setHttpStatusCode(200);
             $res->addMessage("Login succes");
-            $userArray = \Repository\ORM\DatabaseObject::objectToArray($user);
+            $userArray = \Repository\ORM\DatabaseObject::objectToArray($user, []);
             unset($userArray['password']);
+            
             $res->setData(["accessToken" => $accessToken, "user" => $userArray]);
             $res->send();
             exit;
@@ -410,8 +411,8 @@ abstract class UserController
 
         $username = $body->username;
         try{
-            $userRepo = new \Repository\UserRepo();
-            if($userRepo->checkUsername($username))
+            
+            if(\Repository\ORM\ORM::checkUsername($username))
             {
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);

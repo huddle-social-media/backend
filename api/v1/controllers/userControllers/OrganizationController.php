@@ -102,7 +102,7 @@ class OrganizationController extends UserController
             {
                 $res->setSuccess(false);
                 $res->setHttpStatusCode(400);
-                $res->addMessage("Invalid request body5");
+                $res->addMessage("Invalid request body");
                 $res->addMessage("Username exists");
                 $res->send();
                 exit;
@@ -138,12 +138,13 @@ class OrganizationController extends UserController
             exit;
         }
 
-        if(!PasswordHandler::verifyStrength($body->password))
+        if(!\Helpers\PasswordHandler::verifyStrength($body->password))
         {
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
             $res->addMessage("Password is too weak");
             $res->send();
+            exit;
         }
 
 
@@ -153,20 +154,25 @@ class OrganizationController extends UserController
         $email = trim($body->email);
         $interest = trim($body->interest);
         $location = trim($body->location);
-        $type = $body->type;
         $year = $body->doe->year;
         $month = $body->doe->month;
         $day = $body->doe->day;
-        $password = $body->password;
+        $password = \Helpers\PasswordHandler::bcrypt($body->password);
 
         try{
             // $organizationUser = new \Models\OrganizationUser($organizationName, $username, $type, $email, $interest, $year, $month, $day, $location, $password);++++++++++++++++++++++
             $organizationUser = \Models\OrganizationUser::create();
-            $organizationUser->initialize($organizationName, $username, $type, $email, $interest, $year, $month, $day, $location, $password);
+            $organizationUser->initialize($organizationName, $username, $email, $interest, $year, $month, $day, $location, $password);
+            $id = \Repository\ORM\ORM::writeObject($organizationUser);
+            $organizationUser->setUserId($id);
             $res->setSuccess(true);
             $res->setHttpStatusCode(200);
             $res->addMessage("User created successfully");
-            $res->setData(["id" => $organizationUser->getUserId(), "organization name" => $organizationUser->getOrganizationName(), "username" => $organizationUser->getUsername(), "email" => $organizationUser->getEmail(), "type" => $organizationUser->getType(), "doe" => $organizationUser->getDoe(), "location" => $organizationUser->getLocation(), "interest" => $organizationUser->getInterest(), "status" => $organizationUser->getStatus()]);
+            $dataArray = \Repository\ORM\DatabaseObject::objectToArray($organizationUser, []);
+            unset($dataArray["password"]);
+            unset($dataArray["dbTable"]);
+            unset($dataArray["primaryKeysArray"]);
+            $res->setData($dataArray);
             $res->send();
             exit;
         }catch(Exception $ex){

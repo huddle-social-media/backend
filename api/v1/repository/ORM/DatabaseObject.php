@@ -88,19 +88,23 @@ class DatabaseObject
     //     return $result;
     // }
 
-    public static function objectToArray($object)
+    public static function objectToArray($object, $array, $ref = NULL)
     {
         $className = "";
-        if(is_object($object))
+        if($ref)
+        {
+            $className = get_class($ref);
+        }
+        elseif(is_object($object))
         {
             $className = get_class($object);
         }
         
         $rc = new \ReflectionClass($className);
-        $props = $rc->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PRIVATE);
+        $props = $rc->getProperties();
         $attributes = [];
         //$values = [];
-        $array = [];
+        
 
         foreach($props as $name=>$value)
         {
@@ -118,6 +122,16 @@ class DatabaseObject
             $array[$attribute] = $value;
         }
 
+        
+
+        $parentClass = $rc->getParentClass();
+        
+
+        if($className != $parentClass->getName() && $parentClass->getName() != "Models\HuddleObj")
+        {
+            return self::objectToArray($object,$array,$parentClass->getName()::create());
+        }
+
         return $array;
     }
 
@@ -132,12 +146,12 @@ class DatabaseObject
         $params = [];
 
 
-        $array = self::objectToArray($object);
+        $array = self::objectToArray($object, []);
 
         foreach($array as $key=>$value)
         {
             
-            if($value != NULL && $key != "dbTable" && $key != "primaryKeyArray")
+            if($value != NULL && $key != "dbTable" && $key != "primaryKeysArray")
             {
                 $attributes[] = $key;
                 $values[] = $value;
@@ -156,8 +170,10 @@ class DatabaseObject
         }
 
         $query = "INSERT INTO `".$DbTableName."`(".$attrString.") VALUES(".$parmsString.");";
+        
         try
         {
+            
             self::$writeConn->beginTransaction();
             $stmt = self::$writeConn->prepare($query);
             $stmt->execute($values);
@@ -242,12 +258,12 @@ class DatabaseObject
         $params = [];
 
 
-        $array = self::objectToArray($object);
+        $array = self::objectToArray($object, []);
 
         foreach($array as $key=>$value)
         {
             
-            if(!is_array($value) && $value != NULL && $key != "dbTable")
+            if(!is_array($value) && $value != NULL && $key != "dbTable" && $key != "primaryKeysArray")
             {
                 $attributes[] = $key;
                 $values[] = $value;
