@@ -2,11 +2,8 @@
 
 namespace Repository\ORM;
 
-<<<<<<< HEAD
-=======
 require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
->>>>>>> origin/master
 class ORM
 {
     public static function makeUserList(string $name)
@@ -16,12 +13,6 @@ class ORM
         return DatabaseObject::MapRelationToObject('User', $query, ['%'.$name.'%']); 
     }
 
-<<<<<<< HEAD
-    public static function makeCasualUser(int $id)
-    {
-        $query = "SELECT * FROM user WHERE userId = ?;";
-        return DatabaseObject::MapRelationToObject('CasualUser', $query, [$id]); 
-=======
     public static function makeUserById(int $id, $type)
     {
         $query = "SELECT * FROM user WHERE userId = ?;";
@@ -38,7 +29,6 @@ class ORM
     {
         $query = "SELECT * FROM user WHERE user_id = ?;";
         return DatabaseObject::MapRelationToObject('UserStatus', $query, [$id]); 
->>>>>>> origin/master
     }
 
     public static function writeObject($object)
@@ -46,33 +36,18 @@ class ORM
         return DatabaseObject::MapObjectToRelation($object);
     }
 
-<<<<<<< HEAD
-    public static function checkUsername($username)
-=======
     public static function checkUsername(string $username)
->>>>>>> origin/master
     {
         $query = 'SELECT * FROM `user` WHERE username = ?';
         return DatabaseObject::checkQuery($query, [$username]);
     }
 
-<<<<<<< HEAD
-    public static function checkEmail($email)
-=======
     public static function checkEmail(string $email)
->>>>>>> origin/master
     {
         $query = 'SELECT * FROM `user` WHERE email = ?';
         return DatabaseObject::checkQuery($query, [$email]);
     }
 
-<<<<<<< HEAD
-    public static function makePost($id)
-    {
-        $query = "SELECT * FROM `post` WHERE post_id = ?;";
-        return DatabaseObject::MapRelationToObject('Post', $query, [$id]);
-    }
-=======
     public static function makePost($post_id)
     {
         $query = "SELECT * FROM `post` WHERE post_id = ?;";
@@ -135,5 +110,4 @@ class ORM
     //     return DatabaseObject::MapRelationToObject('Like', $query, [$Unlike]);
     // }
 
->>>>>>> origin/master
 }

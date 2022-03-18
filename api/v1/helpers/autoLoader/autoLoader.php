@@ -16,12 +16,6 @@ spl_autoload_register(function ($className)
         'helpers/JWT/',
         'helpers/Response/',
         'helpers/Request/',
-<<<<<<< HEAD
-        'models/content/',
-        'models/users/',
-        'repository/ORM/',
-        'router/'
-=======
         'helpers/PasswordHandler/',
         'models/content/',
         'models/users/',
@@ -33,7 +27,6 @@ spl_autoload_register(function ($className)
         'models/sessions/',
         'models/abstract/',
         'models/action/'
->>>>>>> origin/master
     );
     
     //for each directory

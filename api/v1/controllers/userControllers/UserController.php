@@ -10,13 +10,6 @@ use \Helpers\JWT as JWT;
 use \Helpers\PasswordHandler as PasswordHandler;
 use PDOException;
 
-<<<<<<< HEAD
-abstract class UserController 
-{
-    public static function signUp($req, $res)
-    {   
-        $body = $req->validateRequest($res);
-=======
 abstract class UserController
 {
     public static function signUp($req, $res)
@@ -38,7 +31,6 @@ abstract class UserController
             $res->send();
             exit;
         }
->>>>>>> origin/master
 
         if(!isset($body->email) || !isset($body->username) || !isset($body->password) || !isset($body->type) || !isset($body->firstname) || !isset($body->lastname) || !isset($body->gender) || !isset($body->dob) || !isset($body->interest))
         {
@@ -62,13 +54,8 @@ abstract class UserController
         {
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
-<<<<<<< HEAD
-            $res->addMessage("Invalid request body2");
-            (strlen($body->email) < 1) ? $res->addMessage("Email can not be blank") : false ;
-=======
             $res->addMessage("Invalid request body");
             (strlen($body->email) < 1) ? $res->addMessage("Email can not be blank") : false;
->>>>>>> origin/master
             (strlen($body->email) > 255) ? $res->addMessage("Email cannot be greater than 255 characters") : false ;
             (strlen($body->password) < 1) ? $res->addMessage("Password can not be blank") : false ;
             (strlen($body->password) > 255) ? $res->addMessage("Password cannot be greater than 255 characters") : false ;
@@ -111,8 +98,6 @@ abstract class UserController
             exit;
         }
 
-<<<<<<< HEAD
-=======
         try{
             // $userRepo = new \Repository\UserRepo(); ++++++++++++++++++++++++++++
             if(\Repository\ORM\ORM::checkUsername($body->username))
@@ -155,7 +140,6 @@ abstract class UserController
             exit;
         }
 
->>>>>>> origin/master
         if(!PasswordHandler::verifyStrength($body->password))
         {
             $res->setSuccess(false);
@@ -164,11 +148,7 @@ abstract class UserController
             $res->send();
             exit;
         }
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> origin/master
 
         $firstname = trim($body->firstname);
         $lastname = trim($body->lastname);
@@ -181,51 +161,6 @@ abstract class UserController
         $year = $body->dob->year;
         $month = $body->dob->month;
         $day = $body->dob->day;
-<<<<<<< HEAD
-        $password = $body->password;
-
-        // call the orm UserRepository
-        // if($type === 'casual')
-        // {
-        //     try{
-        //         $casualUser = new \Models\CasualUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
-        //         var_dump($casualUser);
-        //     }catch(Exception $ex){
-        //         $res->setSuccess(false);
-        //         $res->setHttpStatusCode(400);
-        //         $res->addMessage($ex->getMessage());
-        //         $res->send();
-        //         exit;
-        //     }
-        // }else if($type === 'celebrity')
-        // {
-        //     try{
-        //         $celebrityUser = new \Models\CelebrityUser($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
-        //         var_dump($celebrityUser);
-        //     }catch(Exception $ex) {
-        //         $res->setSuccess(false);
-        //         $res->setHttpStatusCode(400);
-        //         $res->addMessage($ex->getMessage());
-        //         $res->send();
-        //         exit;
-        //     }
-        // }
-    }   
-
-    public static function login($req, $res)
-    {
-
-    }
-
-    public static function checkUsername($req, $res)
-    {
-     
-        if($req->contentType() !== "application/json")
-        {
-            $res->setSuccess(false);
-            $res->setHttpStatusCode(400);
-            $res->addMessage("Content type invalid");
-=======
         $password = PasswordHandler::bcrypt($body->password);
 
         // call the orm UserRepository
@@ -443,24 +378,15 @@ abstract class UserController
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
             $res->addMessage("Request body is empty or not valid");
->>>>>>> origin/master
             $res->send();
             exit;
         }
 
-<<<<<<< HEAD
-        if(($body = $req->body()) === false)
-        {
-            $res->setSuccess(false);
-            $res->setHttpStatusCode(400);
-            $res->addMessage("Request body contain invalid JSON");
-=======
         if($req->contentType() !== "application/json")
         {
             $res->setSuccess(false);
             $res->setHttpStatusCode(400);
             $res->addMessage("Content type invalid");
->>>>>>> origin/master
             $res->send();
             exit;
         }
@@ -486,11 +412,7 @@ abstract class UserController
         $username = $body->username;
         try{
             
-<<<<<<< HEAD
-            if(\Repository\ORM\ORM::checkUsername($body->username))
-=======
             if(\Repository\ORM\ORM::checkUsername($username))
->>>>>>> origin/master
             {
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);
@@ -515,9 +437,6 @@ abstract class UserController
             exit;
         }
     }
-<<<<<<< HEAD
-}
-=======
 
     public static function sayHello($req, $res)
     {
@@ -538,4 +457,3 @@ abstract class UserController
         exit;
     }
 }
->>>>>>> origin/master

@@ -4,15 +4,6 @@ namespace Models;
 
 use Exception;
 
-<<<<<<< HEAD
-require_once __DIR__."/../../helpers/PasswordHandler/PasswordHandler.php";
-
-use \Helpers\PasswordHandler as PasswordHandler;
-
-abstract class User
-{
-    private $userId;
-=======
 require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 use \Helpers\PasswordHandler as PasswordHandler;
@@ -20,32 +11,10 @@ use \Helpers\PasswordHandler as PasswordHandler;
 class User extends HuddleObj
 {
     private $user_id = null;
->>>>>>> origin/master
     private $username;
     private $email;
     private $interest;
     private $banned = false;
-<<<<<<< HEAD
-    private $loginAttempts = 0;
-    protected $status;
-    protected $type;
-    protected $hashedPassword;
-
-
-    public function __construct($username, $email, $interest, $password)
-    {
-        $this->setUsername($username);
-        $this->setEmail($email);
-        $this->setInterest($interest);
-        $this->setPassword($password);
-    }
-
-    public function setUserId($userId)
-    {
-        if(($userId !== null) && (!is_numeric($userId) || $userId <= 0 || $userId > 9223372036854775807 || $this->userId !== null))
-            throw new Exception("Can not set the user ID");
-        $this->userId = $userId;
-=======
     private $login_attempts = 0;
     private $logged_in = false;
     protected $status;
@@ -62,7 +31,6 @@ class User extends HuddleObj
         if(($user_id !== null) && (!is_numeric($user_id) || $user_id <= 0 || $user_id > 9223372036854775807 || $this->user_id !== null))
             throw new Exception("Can not set the user ID");
         $this->user_id = $user_id;
->>>>>>> origin/master
     }
 
     public function setUsername($username)
@@ -74,11 +42,6 @@ class User extends HuddleObj
 
     public function setPassword($password)
     {
-<<<<<<< HEAD
-        if(!PasswordHandler::verifyStrength($password))
-            throw new Exception("Password is too weak");
-        $this->hashedPassword = PasswordHandler::bcrypt($password);
-=======
         if(strlen($password) < 1 || strlen($password) > 255)
             throw new Exception("Can not set the password");
         $this->password = $password;
@@ -87,7 +50,6 @@ class User extends HuddleObj
     public function unsetPassword()
     {
         $this->password = null;
->>>>>>> origin/master
     }
 
     public function setEmail($email)
@@ -97,19 +59,6 @@ class User extends HuddleObj
             throw new Exception("Can not set the email");
         $this->email = $email;
     }
-<<<<<<< HEAD
-    
-    public function setInterest($interest)
-    {
-        if(strlen($interest) < 1 || strlen($interest) > 255)
-        throw new Exception("Can not set the interest");
-        $this->interest = $interest;
-    }
-
-    public function setBanned()
-    {
-        $this->banned = !$this->banned;
-=======
 
     public function setLoggedIn($loginStatus)
     {
@@ -133,7 +82,6 @@ class User extends HuddleObj
     public function getBanned()
     {
         return $this->banned;
->>>>>>> origin/master
     }
 
     public function setLoginAttempts()
@@ -141,12 +89,6 @@ class User extends HuddleObj
         // need to implement
     }
 
-<<<<<<< HEAD
-    abstract public function setType($type);
-    abstract public function setStatus($status);
-    abstract public function addUser();
-}
-=======
     public function getUserId()
     {
         return $this->user_id;
@@ -198,4 +140,3 @@ class User extends HuddleObj
     }
 
 }
->>>>>>> origin/master

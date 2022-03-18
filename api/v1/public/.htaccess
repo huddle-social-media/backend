@@ -1,8 +1,5 @@
 # Redirecting all requests through public/index.php
-<<<<<<< HEAD
-=======
 Header Set Access-Control-Allow-Origin "https://huddle.com"
->>>>>>> origin/master
 
 RewriteEngine on
 RewriteBase /
@@ -10,10 +7,6 @@ RewriteBase /
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-<<<<<<< HEAD
-RewriteRule ^(.*)$ index.php [L,QSA]
-=======
 RewriteRule ^(.*)$ index.php [L,QSA]
 RewriteCond %{HTTP:Authorization} ^(.+)$
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
->>>>>>> origin/master

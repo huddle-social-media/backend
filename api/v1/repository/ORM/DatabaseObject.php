@@ -29,11 +29,7 @@ class DatabaseObject
 
     public static function MapRelationToObject($type, $query, $params)
     {
-<<<<<<< HEAD
-        $res = self::runReadQuery($query, $params);
-=======
         $res = self::readQuery($query, $params);
->>>>>>> origin/master
 
         $res->setFetchMode(\PDO::FETCH_CLASS, '\\Models\\'.$type);
         
@@ -57,45 +53,6 @@ class DatabaseObject
     }
 
     // ########### UNDER TESTING ############# (Have to add exceptions)
-<<<<<<< HEAD
-    public static function objectToArray($data) {
-        $className = "";
-        if(is_object($data))
-        {
-            $className = get_class($data);
-        }
-        if ((! is_array($data)) and (! is_object($data)))
-            return $data; 
-    
-        $result = array();
-    
-        $data = (array) $data;
-        foreach ($data as $key => $value) {
-            if($className !== "")
-            {
-                $pos = strpos($key, $className);
-                if($pos != false)
-                {
-                    $key = substr($key, $pos + strlen($className));
-                }
-                
-            }
-            $key = str_replace('*', '', $key);
-            $key = preg_replace('/[\x00-\x1F\x7F]/', '', $key);     // removes hidden characters that interfere with checking
-            if (is_object($value))
-                $value = (array) $value;
-            if (is_array($value))
-                $result[$key] = self::objectToArray($value);
-            else
-                $result[$key] = $value;
-        }
-
-        return $result;
-    }
-
-    // ########### UNDER TESTING ############# (Have to add exceptions)
-    public static function MapObjectToRelation($object)
-=======
     // public static function objectToArray($data) {
     //     $className = "";
     //     if(is_object($data))
@@ -180,7 +137,6 @@ class DatabaseObject
 
     // ########### UNDER TESTING ############# (Have to add exceptions)
     public static function MapObjectToRelation(\Models\HuddleObj $object)
->>>>>>> origin/master
     {
 
         $DbTableName = $object->getDbTable();
@@ -190,20 +146,12 @@ class DatabaseObject
         $params = [];
 
 
-<<<<<<< HEAD
-        $array = self::objectToArray($object);
-=======
         $array = self::objectToArray($object, []);
->>>>>>> origin/master
 
         foreach($array as $key=>$value)
         {
             
-<<<<<<< HEAD
-            if(!is_array($value) && $value != NULL && $key != "dbTable")
-=======
             if($value != NULL && $key != "dbTable" && $key != "primaryKeysArray")
->>>>>>> origin/master
             {
                 $attributes[] = $key;
                 $values[] = $value;
@@ -222,15 +170,6 @@ class DatabaseObject
         }
 
         $query = "INSERT INTO `".$DbTableName."`(".$attrString.") VALUES(".$parmsString.");";
-<<<<<<< HEAD
-        try
-        {
-            $stmt = self::$writeConn->prepare($query);
-            $stmt->execute($values);
-        }catch(\PDOException $ex)
-        {
-            error_log('Error running query - '.$ex, 0);
-=======
         
         try
         {
@@ -245,7 +184,6 @@ class DatabaseObject
         {
             error_log('Error running query - '.$ex, 0);
             self::$writeConn->rollBack();
->>>>>>> origin/master
             $response = new \Helpers\Response();
             $response->setSuccess(false);
             $response->setHttpStatusCode(500);
@@ -255,16 +193,6 @@ class DatabaseObject
         }
         
 
-<<<<<<< HEAD
-        return self::$writeConn->lastInsertId();
-
-
-    }
-
-    public static function checkQuery($query, $params)
-    {
-        $res = self::runReadQuery($query, $params);
-=======
         return $id;
 
 
@@ -290,16 +218,11 @@ class DatabaseObject
     public static function checkQuery($query, $params)
     {
         $res = self::readQuery($query, $params);
->>>>>>> origin/master
 
         return $res->rowCount();
     }
 
-<<<<<<< HEAD
-    private static function runReadQuery($query, $params)
-=======
     private static function readQuery($query, $params)
->>>>>>> origin/master
     {
         if(self::$readConn === null)
         {
@@ -325,8 +248,6 @@ class DatabaseObject
         return $res;
     }
 
-<<<<<<< HEAD
-=======
     public static function UpdateObjectInRelation(\Models\HuddleObj $object)
     {
 
@@ -405,6 +326,5 @@ class DatabaseObject
 
     }
 
->>>>>>> origin/master
 
 }

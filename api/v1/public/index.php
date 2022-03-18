@@ -1,21 +1,4 @@
 <?php
-<<<<<<< HEAD
-
-require_once __DIR__."/../helpers/autoLoader/autoLoader.php";
-
-
-\Router\Router::get('/', function($req, $res){
-    $res->setHttpStatusCode(200);
-    $res->setSuccess(true);
-    $res->addMessage("Hey this is the controller");
-    $res->send();
-    
-});
-
-\Router\Router::post('/posts', '\Controllers\PostController::createPost');
-
-\Router\Router::listen();
-=======
 require_once __DIR__."/../helpers/autoLoader/autoLoader.php";
 
 Router\Router::get("/", function(){
@@ -41,4 +24,3 @@ Router\Router::options("/users", Controllers\UserController::class."::CROS");
 Router\Router::listen(function($port){
     echo "<br><h1>Server up and running on port: $port</h1><br>";
 });
->>>>>>> origin/master
