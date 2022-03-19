@@ -21,6 +21,8 @@ Router\Router::options("/users/silent_auth", Controllers\UserController::class."
 Router\Router::options("/users/sign_in", Controllers\UserController::class."::CROS");
 Router\Router::options("/users", Controllers\UserController::class."::CROS");
 
+Router\Router::get("/events/attending_events", Controllers\EventController::class."::attendingEvents");
+
 Router\Router::listen(function($port){
     echo "<br><h1>Server up and running on port: $port</h1><br>";
 });

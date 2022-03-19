@@ -12,6 +12,7 @@ spl_autoload_register(function ($className)
     $directories = array(
         'controllers/contentControllers/',
         'controllers/userControllers/',
+        'controllers/eventControllers/',
         'config/database/',
         'helpers/JWT/',
         'helpers/Response/',

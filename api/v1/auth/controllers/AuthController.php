@@ -250,12 +250,11 @@ class AuthController
     public static function auth($req, $res, $next)
     {
         try {
-            $authRepo = new \Repository\AuthRepo();
             $authenticateService = new \Services\Authentication();
             $authorizationService = new \Services\Authorization();
-            $session = self::authRefreshToken($req, $res, $authenticateService,$authRepo);
+            $session = self::authRefreshToken($req, $res, $authenticateService);
             $payload = self::authAccessToken($req, $res, $authorizationService);
-            self::authRequestedClient($res, $session, $payload, $authRepo);
+            self::authRequestedClient($res, $session, $payload);
             call_user_func_array($next, [$req, $res, $payload->userId]);
         }catch(\PDOException $ex){
             $res->setSuccess(false);
