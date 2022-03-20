@@ -451,9 +451,12 @@ abstract class UserController
         header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type, Authorization');
         header('Access-Control-Max-Age: 5184000');
+        header('Access-Control-Allow-Origin: https://huddle.com');
         $res->setSuccess(true);
         $res->setHttpStatusCode(200);
         $res->send();
         exit;
     }
+
+    
 }

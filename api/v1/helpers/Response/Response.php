@@ -48,6 +48,7 @@ class Response {
 		// set response header contact type to json utf-8
 		header('Content-type:application/json;charset=utf-8');
 		header('Access-Control-Allow-Credentials: true');
+
 		
 		// if response is cacheable then add http cache-control header with a timeout of 60 seconds
 		// else set no cache
