@@ -111,7 +111,9 @@ class Request
 
     private function setHttpAuth()
     {
-        if(!isset($_SERVER['HTTP_AUTHORIZATION']))
+        $matches = [];
+        preg_match('/Bearer\s(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches);
+        if(!isset($_SERVER['HTTP_AUTHORIZATION']) || $matches[1] === "null")
         {
             $this->httpAuth = '';
             return;
