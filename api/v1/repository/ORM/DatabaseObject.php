@@ -88,7 +88,7 @@ class DatabaseObject
     //     return $result;
     // }
 
-    public static function objectToArray($object, $array, $ref = NULL)
+    public static function objectToArray($object, $array = [], $ref = NULL)
     {
         $className = "";
         if($ref)

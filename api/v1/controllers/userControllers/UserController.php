@@ -195,6 +195,8 @@ abstract class UserController
                 // $celebrityUser = $celebrityUser->create();
                 $celebrityUser = \Models\CelebrityUser::create();
                 $celebrityUser->initialize($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password);
+                $id = \Repository\ORM\ORM::writeObject($celebrityUser);
+                $celebrityUser->setUserId($id);
                 $res->setSuccess(true);
                 $res->setHttpStatusCode(200);
                 $res->addMessage("User created successfully");

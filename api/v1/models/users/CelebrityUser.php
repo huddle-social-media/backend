@@ -9,8 +9,8 @@ require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 class CelebrityUser extends User
 {
     private const statusCodes = ['active', 'deactive', 'locked', 'unverified'];
-    private $firstname;
-    private $lastname;
+    private $first_name;
+    private $last_name;
     private $dob;
     private $gender;
 
@@ -19,10 +19,10 @@ class CelebrityUser extends User
         return new self();
     }
 
-    public function initialize($firstname, $lastname, $username, $type, $email, $interest, $year, $month, $day, $gender, $password)
+    public function initialize($first_name, $last_name, $username, $type, $email, $interest, $year, $month, $day, $gender, $password)
     {
-        $this->setFirstname($firstname);
-        $this->setLastname($lastname);
+        $this->setFirstname($first_name);
+        $this->setLastname($last_name);
         $this->setType($type);
         $this->setGender($gender);
         $this->setDob($year, $month, $day);
@@ -35,18 +35,18 @@ class CelebrityUser extends User
 
     
 
-    public function setFirstname($firstname)
+    public function setFirstname($first_name)
     {
-        if(strlen($firstname) < 1 || strlen($firstname) > 255)
+        if(strlen($first_name) < 1 || strlen($first_name) > 255)
             throw new Exception("Can not set the firstname");
-        $this->firstname = $firstname;
+        $this->first_name = $first_name;
     }
 
-    public function setLastname($lastname)
+    public function setLastname($last_name)
     {
-        if(strlen($lastname) < 1 || strlen($lastname) > 255)
+        if(strlen($last_name) < 1 || strlen($last_name) > 255)
             throw new Exception("Can not set the lastname");
-        $this->lastname = $lastname;
+        $this->last_name = $last_name;
     }
 
     public function setGender($gender)
@@ -80,12 +80,12 @@ class CelebrityUser extends User
 
     public function getFirstname()
     {
-        return $this->firstname;
+        return $this->first_name;
     }
 
     public function getLastname()
     {
-        return $this->lastname;
+        return $this->last_name;
     }
 
     public function getGender()

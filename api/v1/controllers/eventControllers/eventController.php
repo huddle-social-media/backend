@@ -25,6 +25,11 @@ abstract class EventController{
 
     public static function attendingEvents($req, $res)
     {
+        self::initialCheck($req, $res);
+
+        
+
+
         $res->setSuccess(true);
         $res->setHttpStatusCode(200);
         $res->setData(["Hello" => "This is fun"]);

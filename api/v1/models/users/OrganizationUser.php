@@ -11,17 +11,19 @@ class OrganizationUser extends User
     protected const statusCodes = ['active', 'deactive', 'locked', 'unverified'];
     private $organization_name;
     private $doe;
-    private $location;
+    private $loc_lng;
+    private $loc_lat;
 
     public static function create()
     {
         return new self();
     }
 
-    public function initialize($organizationName, $username, $email, $interest, $year, $month, $day, $location, $password, $status = self::statusCodes[3])
+    public function initialize($organizationName, $username, $email, $interest, $year, $month, $day, $locLat, $locLng, $password, $status = self::statusCodes[3])
     {
         $this->setDoe($year, $month, $day);
-        $this->setLocation($location);
+        $this->setLocLat($locLat);
+        $this->setLocLng($locLng);
         $this->setOrganizationName($organizationName);
         $this->setType("organization");
         $this->setStatus($status);
@@ -39,11 +41,18 @@ class OrganizationUser extends User
         $this->organization_name = $organizationName;
     }
 
-    public function setLocation($location)
+    public function setLocLat($locLat)
     {
-        if(strlen($location) < 1 || strlen($location) > 255)
+        if(strlen($locLat) < 1 || strlen($locLat) > 255)
             throw new Exception("Can not set the location");
-        $this->location = $location;
+        $this->loc_lat = $locLat;
+    }
+
+    public function setLocLng($locLng)
+    {
+        if(strlen($locLng) < 1 || strlen($locLng) > 255)
+            throw new Exception("Can not set the location");
+        $this->loc_lng = $locLng;
     }
 
     public function setGender($gender)
@@ -85,9 +94,14 @@ class OrganizationUser extends User
         return $this->doe;
     }
 
-    public function getLocation()
+    public function getLocLat()
     {
-        return $this->location;
+        return $this->loc_lat;
+    }
+
+    public function getLocLng()
+    {
+        return $this->loc_lng;
     }
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
