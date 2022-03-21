@@ -4,6 +4,7 @@ namespace Helpers;
 use UnexpectedValueException;
 use DomainException;
 use BadFunctionCallException;
+use Exception;
 
 ini_set('display_errors', 1);
 
@@ -48,6 +49,9 @@ class JWT {
      */
     public static function urlSafeBase64Decode(string $input)
     {
+        if(empty($input)) {
+            throw new \Exception("Invalid input");
+        }
         $charCount = 4;
         $remain = strlen($input) % $charCount;
         if($remain) 
@@ -99,19 +103,23 @@ class JWT {
      */
     public static function encode(mixed $payload, string $key, string $alg = "HS256", array $head = null)
     {
-        $header = ["typ" => "JWT", "alg" => $alg];
-        if(isset($head) && is_array($head))
-        {
-            $header = array_merge($head, $header);
+        try {
+            $header = ["typ" => "JWT", "alg" => $alg];
+            if(isset($head) && is_array($head))
+            {
+                $header = array_merge($head, $header);
+            }
+            $segments = [];
+            $segments[] = self::urlSafeBase64Encode(json_encode($header));
+            $segments[] = self::urlSafeBase64Encode(json_encode($payload));
+            $inputForSigning = implode('.', $segments);
+            $signature = self::sign($inputForSigning, $key, $alg);
+            $segments[] = self::urlSafeBase64Encode($signature);
+            $jwt = implode('.', $segments);
+            return $jwt;
+        }catch(\Exception $ex) {
+            throw new \Exception("Failed to encode accesss token");
         }
-        $segments = [];
-        $segments[] = self::urlSafeBase64Encode(json_encode($header));
-        $segments[] = self::urlSafeBase64Encode(json_encode($payload));
-        $inputForSigning = implode('.', $segments);
-        $signature = self::sign($inputForSigning, $key, $alg);
-        $segments[] = self::urlSafeBase64Encode($signature);
-        $jwt = implode('.', $segments);
-        return $jwt;
     }
 
 
