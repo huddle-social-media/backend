@@ -25,13 +25,9 @@ abstract class EventController{
 
     public static function attendingEvents($req, $res)
     {
-
-        header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization');
-        header('Access-Control-Max-Age: 5184000');
-
         $res->setSuccess(true);
         $res->setHttpStatusCode(200);
+        $res->setData(["Hello" => "This is fun"]);
         $res->send();
         exit;
         

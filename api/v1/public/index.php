@@ -22,6 +22,7 @@ Router\Router::options("/users/sign_in", Controllers\UserController::class."::CR
 Router\Router::options("/users", Controllers\UserController::class."::CROS");
 
 Router\Router::get("/events/attending_events", Controllers\EventController::class."::attendingEvents");
+Router\Router::options("/events/attending_events", Controllers\UserController::class."::CROS");
 
 
 Router\Router::options("/events/attending_events", Controllers\UserController::class."::CROS");
