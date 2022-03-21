@@ -174,7 +174,7 @@ class AuthController
         if(empty($req->httpAuth()))
         {
             $res->setSuccess(false);
-            $res->setHttpStatusCode(401);
+            $res->setHttpStatusCode(400);
             $res->addMessage("Authorization header not found");
             $res->send();
             exit;
@@ -183,7 +183,7 @@ class AuthController
         if(!$authorizationService->isTypeValid($req->httpAuth()))
         {
             $res->setSuccess(false);
-            $res->setHttpStatusCode(401);
+            $res->setHttpStatusCode(400);
             $res->addMessage("Authorization header not valid");
             $res->send();
             exit;
@@ -192,16 +192,16 @@ class AuthController
         if(empty($authorizationService->extractAccessToken($req->httpAuth())))
         {
             $res->setSuccess(false);
-            $res->setHttpStatusCode(401);
+            $res->setHttpStatusCode(400);
             $res->addMessage("Access token not found");
             $res->send();
             exit;
         }
 
-        if($authorizationService->isAccessTokenVerified($req->httpAuth()))
+        if(!$authorizationService->isAccessTokenVerified($req->httpAuth()))
         {
             $res->setSuccess(false);
-            $res->setHttpStatusCode(401);
+            $res->setHttpStatusCode(400);
             $res->addMessage("Access token not valid");
             $res->send();
             exit;
@@ -229,10 +229,10 @@ class AuthController
             $res->addMessage($ex->getMessage());
             $res->send();
             exit;
-        }catch(\Exception $ex) // for catching JWT exceptio, but needed proper exeception handling
+        }catch(\Exception $ex) // for catching JWT exception, but need proper exeception handling
         {
             $res->setSuccess(false);
-            $res->setHttpStatusCode(500);
+            $res->setHttpStatusCode(400);
             $res->addMessage($ex->getMessage());
             $res->send();
             exit;
@@ -259,6 +259,12 @@ class AuthController
         }catch(\PDOException $ex){
             $res->setSuccess(false);
             $res->setHttpStatusCode(500);
+            $res->addMessage($ex->getMessage());
+            $res->send();
+            exit;
+        }catch(\Exception $ex) {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
             $res->addMessage($ex->getMessage());
             $res->send();
             exit;
