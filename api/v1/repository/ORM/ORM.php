@@ -110,4 +110,44 @@ class ORM
     //     return DatabaseObject::MapRelationToObject('Like', $query, [$Unlike]);
     // }
 
+    public static function makeEvent($eventId)
+    {
+        $query = "SELECT * FROM `event` WHERE event_id = ?;";
+        return DatabaseObject::MapRelationToObject('Event', $query, [$eventId]);
+    }
+
+    public static function getEventList()
+    {
+        $today = date("Y-m-d");
+        $query = "SELECT * FROM `event` WHERE event_date > ? AND status = 'active' ORDER BY date_time;";
+        return DatabaseObject::MapRelationToObject('Event', $query, [$today]);
+    }
+
+     public static function getAttendingEvents($userId)
+     {
+        $today = date("Y-m-d");
+        $query = "SELECT * FROM `event` WHERE event_date > ?  AND event_id IN (SELECT event_id FROM event_attendant WHERE user_id = ? AND status = 'active' ) ORDER BY date_time;";
+        return DatabaseObject::MapRelationToObject('Event', $query, [$today, $userId]);
+     }
+
+     public static function getAttendingEventIdList($userId){
+        $query="SELECT event_id FROM `event_attendant` WHERE user_id = ? AND status = 'active'";
+        $event_id_list = DatabaseObject::runReadQuery($query, [$userId]);
+        return $event_id_list;
+    }
+
+    public static function makeEventAttendant($eventId, $userId)
+    {
+        $query = "SELECT * FROM `event_attendant` WHERE event_id = ? AND user_id = ?;";
+        return DatabaseObject::MapRelationToObject('EventAttendant', $query, [$eventId, $userId]);
+    }
+
+    public static function checkEventAttendant($eventId, $userId)
+    {
+        $query = "SELECT * FROM `event_attendant` WHERE event_id = ? AND user_id = ?";
+        return DatabaseObject::checkQuery($query, [$eventId, $userId]);
+    }
+
+    
+
 }

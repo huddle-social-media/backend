@@ -290,7 +290,7 @@ class AuthController
             $header = (array)json_decode(\Helpers\JWT::urlSafeBase64Decode($segments[0]));
             $payload = (array)json_decode(\Helpers\JWT::urlSafeBase64Decode($segments[1]));
             self::authRequestedClient($res, $session, (object)$payload);
-            $payload['exp'] = time()+30;
+            $payload['exp'] = time()+ 60*60;
             $newAccessToken = \Helpers\JWT::encode($payload, $authorizationService->getSecretKey(), $header['alg'], $header);
             // send the access token and the refresh token
             // for debug purpose i set the domain for root

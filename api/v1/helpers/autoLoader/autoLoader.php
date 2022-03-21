@@ -26,6 +26,7 @@ spl_autoload_register(function ($className)
         'auth/services/authentication/',
         'auth/services/authorization/',
         'models/sessions/',
+        'models/events/',
         'models/abstract/',
         'models/action/'
     );

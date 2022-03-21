@@ -27,7 +27,7 @@ class DatabaseObject
         
     }
 
-    public static function MapRelationToObject($type, $query, $params)
+    public static function MapRelationToObject($type, $query, $params = [])
     {
         $res = self::readQuery($query, $params);
 
@@ -91,15 +91,16 @@ class DatabaseObject
     public static function objectToArray($object, $array = [], $ref = NULL)
     {
         $className = "";
-        if($ref)
+        if($ref != NULL && is_object($ref))
         {
             $className = get_class($ref);
+            
         }
         elseif(is_object($object))
         {
             $className = get_class($object);
         }
-        
+
         $rc = new \ReflectionClass($className);
         $props = $rc->getProperties();
         $attributes = [];
@@ -278,9 +279,8 @@ class DatabaseObject
         {
             if(in_array($attributes[$i], $keys))
             {
-                $whereString = $whereString."$attributes[$i] = $values[$i] &&";
+                $whereString = $whereString."$attributes[$i] = $values[$i] && ";
                 unset($values[$i]);
-                $values = array_values($values);
 
             }else
             {
@@ -288,6 +288,8 @@ class DatabaseObject
             }
             
         }
+
+        $values = array_values($values);
 
         $whereString = substr($whereString, 0, strlen($whereString)- 3);
         $valueString = substr($valueString, 0, strlen($valueString) - 2);
