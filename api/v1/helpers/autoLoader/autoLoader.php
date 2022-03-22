@@ -13,6 +13,7 @@ spl_autoload_register(function ($className)
         'controllers/contentControllers/',
         'controllers/userControllers/',
         'controllers/eventControllers/',
+        'controllers/issueControllers/',
         'config/database/',
         'helpers/JWT/',
         'helpers/Response/',
@@ -20,6 +21,7 @@ spl_autoload_register(function ($className)
         'helpers/PasswordHandler/',
         'models/content/',
         'models/users/',
+        'models/issues/',
         'repository/ORM/',
         'router/',
         'auth/controllers/',
@@ -28,7 +30,8 @@ spl_autoload_register(function ($className)
         'models/sessions/',
         'models/events/',
         'models/abstract/',
-        'models/action/'
+        'models/action/',
+        'models/imgs/'
     );
     
     //for each directory

@@ -33,6 +33,10 @@ Router\Router::options("/events/leave_event", Controllers\EventController::class
 Router\Router::patch("/events/attend_event", Controllers\EventController::class."::attendEvent");
 Router\Router::options("/events/attend_event", Controllers\EventController::class."::CROS");
 
+Router\Router::get("/issues/issues_on_user", Controllers\IssueController::class."::issuesOnUser");
+Router\Router::options("/issues/issues_on_user", Controllers\IssueController::class."::CROS");
+
+
 Router\Router::listen(function($port){
     echo "<br><h1>Server up and running on port: $port</h1><br>";
 });

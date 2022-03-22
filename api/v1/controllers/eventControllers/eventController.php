@@ -23,6 +23,53 @@ abstract class EventController{
         
     }
 
+    public static function addCollaborators($event, $type)
+    {
+        $collabList = \Repository\ORM\ORM::getCollaboratorList($event['event_id'], $type);
+
+        if($collabList == null)
+        {
+            return $event;
+        }
+
+        if(is_array($collabList))
+        {
+            foreach($collabList as $collab)
+            {
+
+                $temp = \Repository\ORM\DatabaseObject::objectToArray($collab);
+                unset($temp['dbTable']);
+                unset($temp['primaryKeysArray']);
+                unset($temp['password']);
+                unset($temp['status']);
+                unset($temp['state']);
+                unset($temp['login_attempts']);
+                unset($temp['banned']);
+                unset($temp['gender']);
+                unset($temp['dob']);
+                $event['attendingCelebs'][] = $temp;
+            }
+
+        }else
+        {
+            $temp = \Repository\ORM\DatabaseObject::objectToArray($collabList);
+            unset($temp['dbTable']);
+            unset($temp['primaryKeysArray']);
+            unset($temp['password']);
+            unset($temp['status']);
+            unset($temp['state']);
+            unset($temp['login_attempts']);
+            unset($temp['banned']);
+            unset($temp['gender']);
+            unset($temp['dob']);
+            $event['attendingCelebs'][] = $temp;
+        
+        }
+
+        return $event;
+
+    }
+
     public static function adjustTime($obj)
     {
         $time = $obj->getEventTime();
@@ -92,6 +139,8 @@ abstract class EventController{
                 unset($temp['dbTable']);
                 unset($temp['primaryKeysArray']);
                 $temp = self::checkAttendanceOfEvent($eventIdList, $temp);
+                $temp = self::addCollaborators($temp, 'celebrity');
+                $temp = self::addCollaborators($temp, 'organization');
                 $dataArray[] = $temp;
             }
 
@@ -102,6 +151,8 @@ abstract class EventController{
             unset($temp['dbTable']);
             unset($temp['primaryKeysArray']);
             $temp = self::checkAttendanceOfEvent($eventIdList, $temp);
+            $temp = self::addCollaborators($temp, 'celebrity');
+                $temp = self::addCollaborators($temp, 'organization');
             $dataArray[] = $temp;
             
         }
@@ -140,6 +191,8 @@ abstract class EventController{
                 unset($temp['dbTable']);
                 unset($temp['primaryKeysArray']);
                 $temp['state'] = "attending";
+                $temp = self::addCollaborators($temp, 'celebrity');
+                $temp = self::addCollaborators($temp, 'organization');
                 $dataArray[] = $temp;
             }
 
@@ -150,6 +203,8 @@ abstract class EventController{
             unset($temp['dbTable']);
             unset($temp['primaryKeysArray']);
             $temp['state'] = "attending";
+            $temp = self::addCollaborators($temp, 'celebrity');
+            $temp = self::addCollaborators($temp, 'organization');
             $dataArray[] = $temp;
             
         }
@@ -230,6 +285,54 @@ abstract class EventController{
 
 
 
+    }
+
+    public static function allPostedEvents($req, $res, $userId)
+    {
+        self::initialCheck($req, $res);
+
+        $eventList = \Repository\ORM\ORM::getPostedEvents(intval($userId));
+
+        $dataArray = [];
+
+        if($eventList == null)
+        {
+            $res->setSuccess(true);
+            $res->setHttpStatusCode(200);
+            $res->setData(null);
+            $res->send();
+            exit;
+        }
+
+        if(is_array($eventList))
+        {
+            foreach($eventList as $event)
+            {
+                $event = self::adjustTime($event);
+                $temp = \Repository\ORM\DatabaseObject::objectToArray($event);
+                unset($temp['dbTable']);
+                unset($temp['primaryKeysArray']);
+                $temp = self::addCollaborators($temp, 'celebrity');
+                $temp = self::addCollaborators($temp, 'organization');
+                $dataArray[] = $temp;
+            }
+
+        }else
+        {
+            $eventList = self::adjustTime($eventList);
+            $temp = \Repository\ORM\DatabaseObject::objectToArray($eventList);
+            unset($temp['dbTable']);
+            unset($temp['primaryKeysArray']);
+            $temp = self::addCollaborators($temp, 'celebrity');
+            $temp = self::addCollaborators($temp, 'organization');
+            $dataArray[] = $temp;
+            
+        }
+        $res->setSuccess(true);
+        $res->setHttpStatusCode(200);
+        $res->setData($dataArray);
+        $res->send();
+        exit;
     }
 
     public static function CROS($req, $res) {

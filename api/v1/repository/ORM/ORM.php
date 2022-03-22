@@ -15,7 +15,7 @@ class ORM
 
     public static function makeUserById(int $id, $type)
     {
-        $query = "SELECT * FROM user WHERE userId = ?;";
+        $query = "SELECT * FROM user WHERE user_id = ?;";
         return DatabaseObject::MapRelationToObject($type, $query, [$id]); 
     }
 
@@ -147,6 +147,36 @@ class ORM
         $query = "SELECT * FROM `event_attendant` WHERE event_id = ? AND user_id = ?";
         return DatabaseObject::checkQuery($query, [$eventId, $userId]);
     }
+
+    public static function getCollaboratorList($eventId, $type)
+    {
+        $class = $type."User";
+        $class = ucfirst($class);
+        $query = "SELECT * FROM `user` WHERE status = 'active' AND state = 'active' AND type = ? AND user_id IN (SELECT user_id FROM `event_collaborator` WHERE event_id = ? AND state = 'accepted' AND status = 'active');";
+        return DatabaseObject::MapRelationToObject($class , $query, [$type, $eventId]);
+    }
+
+    public static function getPostedEvents($userId)
+    {
+        $query = "SELECT * FROM `event` WHERE status = 'active' AND user_id = ? ORDER BY date_time DESC;";
+        return DatabaseObject::MapRelationToObject('Event', $query, [$userId]);
+    }
+
+    public static function makeIssue($issueId)
+    {
+        $query = "SELECT * FROM `issue` WHERE issue_id = ?;";
+        return DatabaseObject::MapRelationToObject('Issue', $query, [$issueId]);
+    }
+
+    public static function getIssuesOnUser($userId)
+    {
+        $query = "SELECT * FROM `issue` WHERE state = 'pending' AND status = 'active' AND interest IN (SELECT interest FROM issue_interest WHERE user_id = ? AND status = 'active') ORDER BY date_time DESC;";
+        return DatabaseObject::MapRelationToObject('Issue', $query, [$userId]);
+    }
+
+    
+
+    
 
     
 

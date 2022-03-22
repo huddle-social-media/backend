@@ -142,6 +142,12 @@ class DatabaseObject
 
         $DbTableName = $object->getDbTable();
 
+        $extra = [];
+        if(method_exists($object, 'getExtraAttr'))
+        {
+            $extra = $object->getExtraAttr();
+        }
+
         $attributes = [];
         $values = [];
         $params = [];
@@ -152,7 +158,7 @@ class DatabaseObject
         foreach($array as $key=>$value)
         {
             
-            if($value != NULL && $key != "dbTable" && $key != "primaryKeysArray")
+            if($value != NULL && $key != "dbTable" && $key != "primaryKeysArray" && !in_array($key, $extra) && $key != 'extraAttr')
             {
                 $attributes[] = $key;
                 $values[] = $value;
@@ -171,7 +177,7 @@ class DatabaseObject
         }
 
         $query = "INSERT INTO `".$DbTableName."`(".$attrString.") VALUES(".$parmsString.");";
-        
+
         try
         {
             
@@ -254,6 +260,11 @@ class DatabaseObject
 
         $DbTableName = $object->getDbTable();
         $keys = $object->getPrimaryKeysArray();
+        $extra = [];
+        if(method_exists($object, 'getExtraAttr'))
+        {
+            $extra = $object->getExtraAttr();
+        }
         $attributes = [];
         $values = [];
         $params = [];
@@ -264,7 +275,7 @@ class DatabaseObject
         foreach($array as $key=>$value)
         {
             
-            if(!is_array($value) && $value != NULL && $key != "dbTable" && $key != "primaryKeysArray")
+            if(!is_array($value) && $value != NULL && $key != "dbTable" && $key != "primaryKeysArray" && $key != "extraAttr")
             {
                 $attributes[] = $key;
                 $values[] = $value;
@@ -277,7 +288,7 @@ class DatabaseObject
         
         for($i = 0; $i < count($attributes); $i++)
         {
-            if(in_array($attributes[$i], $keys))
+            if(in_array($attributes[$i], $keys) || in_array($attributes[$i], $extra))
             {
                 $whereString = $whereString."$attributes[$i] = $values[$i] && ";
                 unset($values[$i]);

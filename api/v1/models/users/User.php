@@ -10,13 +10,13 @@ use \Helpers\PasswordHandler as PasswordHandler;
 
 class User extends HuddleObj
 {
-    private $user_id = null;
-    private $username;
-    private $email;
-    private $interest;
-    private $banned = false;
-    private $login_attempts = 0;
-    private $logged_in = false;
+    protected $user_id = null;
+    protected $username;
+    protected $email;
+    protected $interest;
+    protected $banned = false;
+    protected $login_attempts = 0;
+    protected $logged_in = false;
     protected $status;
     protected $type;
     protected $password;

@@ -33,6 +33,7 @@ class Event extends HuddleObj
         $this->setLocLng($locLng);
         $this->setInterest($interest);
         $this->setStatus($status);
+        $this->setGoing($going);
 
     }
 

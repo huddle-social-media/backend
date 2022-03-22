@@ -6,6 +6,7 @@ abstract class HuddleObj
 {
     protected $dbTable;
     protected $primaryKeysArray = [];
+    protected $extraAttr = [];
 
     public static function create()
     {
@@ -30,6 +31,11 @@ abstract class HuddleObj
         return $this->primaryKeysArray;
     }
 
+    public function getExtraAttr()
+    {
+        return $this->extraAttr;
+    }
+
     protected function setDbTable($tableName)
     {
         $this->dbTable = $tableName;
@@ -38,5 +44,10 @@ abstract class HuddleObj
     protected function setPrimaryKeysArray(array $array)
     {
         $this->primaryKeysArray = $array;
+    }
+
+    protected function setExtraAttr(array $array)
+    {
+        $this->extraAttr = $array;
     }
 }
