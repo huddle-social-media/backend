@@ -36,6 +36,9 @@ Router\Router::options("/events/attend_event", Controllers\EventController::clas
 Router\Router::get("/issues/issues_on_user", Controllers\IssueController::class."::issuesOnUser");
 Router\Router::options("/issues/issues_on_user", Controllers\IssueController::class."::CROS");
 
+Router\Router::get("/issues/issues_accepted_by_user", Controllers\IssueController::class."::issuesAcceptedByUser");
+Router\Router::options("/issues/issues_accepted_by_user", Controllers\IssueController::class."::CROS");
+
 
 Router\Router::listen(function($port){
     echo "<br><h1>Server up and running on port: $port</h1><br>";

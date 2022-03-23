@@ -119,14 +119,14 @@ class ORM
     public static function getEventList()
     {
         $today = date("Y-m-d");
-        $query = "SELECT * FROM `event` WHERE event_date > ? AND status = 'active' ORDER BY date_time;";
+        $query = "SELECT * FROM `event` WHERE event_date >= ? AND status = 'active' ORDER BY date_time DESC;";
         return DatabaseObject::MapRelationToObject('Event', $query, [$today]);
     }
 
      public static function getAttendingEvents($userId)
      {
         $today = date("Y-m-d");
-        $query = "SELECT * FROM `event` WHERE event_date > ?  AND event_id IN (SELECT event_id FROM event_attendant WHERE user_id = ? AND status = 'active' ) ORDER BY date_time;";
+        $query = "SELECT * FROM `event` WHERE event_date >= ?  AND event_id IN (SELECT event_id FROM event_attendant WHERE user_id = ? AND status = 'active' ) ORDER BY date_time DESC;";
         return DatabaseObject::MapRelationToObject('Event', $query, [$today, $userId]);
      }
 
@@ -173,6 +173,50 @@ class ORM
         $query = "SELECT * FROM `issue` WHERE state = 'pending' AND status = 'active' AND interest IN (SELECT interest FROM issue_interest WHERE user_id = ? AND status = 'active') ORDER BY date_time DESC;";
         return DatabaseObject::MapRelationToObject('Issue', $query, [$userId]);
     }
+
+    public static function getIssuesAcceptedByUser($userId)
+    {
+        $query = "SELECT * FROM `issue` WHERE status = 'active' AND issue_id IN (SELECT issue_id FROM issue_accepted WHERE accepted_user = ? AND state != 'rejected' AND status = 'active') ORDER BY issue_date DESC;";
+        return DatabaseObject::MapRelationToObject('Issue', $query, [$userId]);
+    }
+
+    public static function getClosedIssuesByUser($userId)
+    {
+        $query = "SELECT issue_id FROM `issue_accepted` WHERE status = 'active' AND accepted_user = ? AND state = 'closed';";
+        return DatabaseObject::runReadQuery($query, [$userId]);
+    }
+
+    public static function getChatStatus($issueId, $userId)
+    {
+        $query = "SELECT chat_status FROM `issue_accepted` WHERE status = 'active' AND state = 'open' AND issue_id = ? AND accepted_user = ?;";
+        return DatabaseObject::runReadQuery($query, [$issueId, $userId]);
+    }
+
+    public static function getIssueAcceptedUser($issueId)
+    {
+        $query = "SELECT accepted_user FROM `issue_accepted` WHERE status = 'active' AND issue_id = ? AND state = 'open' OR state = 'closed';";
+        return DatabaseObject::runReadQuery($query, [$issueId]);
+    }
+
+    public static function getReadIssueChatById($issue_id, $me, $otherPerson)
+    {
+        $query = "SELECT * FROM `issue_chat` WHERE status = 'active' AND issue_id = ? AND ((user_id = ? AND sent_to = ? ) OR (user_id = ? AND sent_to = ?)) AND message_id NOT IN (SELECT message_id FROM `issue_chat` WHERE issue_id = ? AND status = 'active' AND user_id = ? AND sent_to = ? AND read_status = 'not read') ORDER BY date_time ASC;";
+        return DatabaseObject::MapRelationToObject('IssueChat', $query, [$issue_id, $me, $otherPerson, $otherPerson, $me, $issue_id, $otherPerson, $me]);
+    }
+
+    public static function getUnreadIssueChatById($issue_id, $user_id, $sentTo)
+    {
+        $query = "SELECT * FROM `issue_chat` WHERE status = 'active' AND read_status = 'not read' AND issue_id = ? AND user_id = ? AND sent_to = ?  ORDER BY date_time ASC;";
+        return DatabaseObject::MapRelationToObject('IssueChat', $query, [$issue_id, $sentTo, $user_id]);
+    }
+
+    public static function getMyAcceptedIssues($userId)
+    {
+        $query = "SELECT * FROM `issue` WHERE status = 'active' AND user_id  = ? AND (state = 'accepted' OR state = 'closed') ORDER BY ASC";
+        return DatabaseObject::MapRelationToObject('Issue', $query, [$userId]);
+    }
+
+    
 
     
 
