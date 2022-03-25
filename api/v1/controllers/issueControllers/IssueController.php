@@ -55,6 +55,7 @@ class IssueController
                 $temp = \Repository\ORM\DatabaseObject::objectToArray($issue);
                 unset($temp['dbTable']);
                 unset($temp['primaryKeysArray']);
+                $temp['me'] = $userId;
                 $dataArray[] = $temp;
             }
 
@@ -64,6 +65,7 @@ class IssueController
             $temp = \Repository\ORM\DatabaseObject::objectToArray($issueList);
             unset($temp['dbTable']);
             unset($temp['primaryKeysArray']);
+            $temp['me'] = $userId;
             $dataArray[] = $temp;
             
         }
@@ -117,7 +119,7 @@ class IssueController
 
         $issueIdList = [];
 
-        if(is_array($closedList) && count($closedList) > 1)
+        if(is_array($closedList) && count($closedList) > 1 && $closedList != null)
         {
             
             foreach($closedList as $item)
@@ -333,6 +335,11 @@ class IssueController
             {
                 $message = self::adjustTime($message, "getMessageTime", "setMessageTime");
                 $temp = \Repository\ORM\DatabaseObject::objectToArray($message);
+                if($temp['sent_status'] == 'not sent')
+                {
+                    $message->setSentStatus('sent');
+                    \Repository\ORM\ORM::updateObject($message);
+                }
                 unset($temp['dbTable']);
                 unset($temp['primaryKeysArray']);
                 $myUnreadArray[] = $temp;
@@ -340,8 +347,13 @@ class IssueController
 
         }elseif($unreadMessages != null)
         {
-            $myMessages = self::adjustTime($unreadMessages,  "getMessageTime", "setMessageTime");
+            $unreadMessages = self::adjustTime($unreadMessages,  "getMessageTime", "setMessageTime");
             $temp = \Repository\ORM\DatabaseObject::objectToArray($unreadMessages);
+            if($temp['sent_status'] == 'not sent')
+                {
+                    $unreadMessages->setSentStatus('sent');
+                    \Repository\ORM\ORM::updateObject($unreadMessages);
+                }
             unset($temp['dbTable']);
             unset($temp['primaryKeysArray']);
             $myUnreadArray[] = $temp;
@@ -353,8 +365,233 @@ class IssueController
         return $obj;
 
 
+    }
+
+    public static function getUnSentIssueChat($req, $res, $userId)
+    {
+        self::initialCheck($req, $res);
+
+        $messageList = \Repository\ORM\ORM::getUnSentIssueChat($userId);
+
+        $myUnSentArray = [];
+
+        if(is_array($messageList))
+        {
+            foreach($messageList as $message)
+            {
+                $message = self::adjustTime($message, "getMessageTime", "setMessageTime");
+                $temp = \Repository\ORM\DatabaseObject::objectToArray($message);
+                if($temp['sent_status'] == 'not sent')
+                {
+                    $message->setSentStatus('sent');
+                    \Repository\ORM\ORM::updateObject($message);
+                }
+                unset($temp['dbTable']);
+                unset($temp['primaryKeysArray']);
+                unset($myUnSentArray['extraAttr']);
+                $myUnSentArray[] = $temp;
+            }
+
+        }elseif($messageList != null)
+        {
+            $messageList = self::adjustTime($messageList,  "getMessageTime", "setMessageTime");
+            $temp = \Repository\ORM\DatabaseObject::objectToArray($messageList);
+            if($temp['sent_status'] == 'not sent')
+                {
+                    $messageList->setSentStatus('sent');
+                    \Repository\ORM\ORM::updateObject($messageList);
+                }
+            unset($temp['dbTable']);
+            unset($temp['primaryKeysArray']);
+            unset($myUnSentArray['extraAttr']);
+            $myUnSentArray[] = $temp;
+        }
+        $res->setSuccess(true);
+        $res->setHttpStatusCode(200);
+        $res->setData($myUnSentArray);
+        $res->send();
+        exit;
 
 
+    }
+
+    public static function acceptIssue($req, $res, $userId)
+    {
+        self::initialCheck($req, $res);
+
+        if($req->body() == null || !isset($req->body()->issue_id))
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Bad Request.");
+            $res->send();
+            exit;
+        }
+
+        $body = $req->body();
+
+        $issueId = $body->issue_id;
+
+        if((\Repository\ORM\ORM::checkIssueAcceptedUser($issueId)) || (\Repository\ORM\ORM::checkAcceptedUserInTable($issueId, $userId)))
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Conflict occured due to invalid request.");
+            $res->send();
+            exit;
+        }
+
+        $issueAccepted = \Models\IssueAccepted::create();
+        $issueAccepted->initialize($issueId, $userId, 'open', date("Y-m-d"), date("H:i:s"), 'open');
+        \Repository\ORM\ORM::writeObject($issueAccepted);
+        $issue = \Repository\ORM\ORM::makeIssue($issueId);
+        $issue->setState('accepted');
+        \Repository\ORM\ORM::updateObject($issue);
+        $dataArray = \Repository\ORM\DatabaseObject::objectToArray($issueAccepted);
+        unset($dataArray['dbTable']);
+        unset($dataArray['primaryKeysArray']);
+        unset($dataArray['extraAttr']);
+        $res->setSuccess(true);
+        $res->setHttpStatusCode(200);
+        $res->addMessage("Object successfully created");
+        $res->setData($dataArray);
+        $res->send();
+        exit;
+
+    }
+
+    public static function markIssueChatAsRead($req, $res, $userId)
+    {
+        self::initialCheck($req, $res);
+
+        if($req->body() == null || !isset($req->body()->unReadMessages))
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Bad Request.");
+            $res->send();
+            exit;
+        }
+
+        $body = $req->body();
+
+        $issueId = $body->issue_id;
+
+        $unReadMessages = $body->unReadMessages;
+
+        $dataArray = [];
+
+        foreach($unReadMessages as $id)
+        {
+            $temp = \Repository\ORM\ORM::makeIssueChat($id);
+            $temp->setReadStatus('read');
+            \Repository\ORM\ORM::updateObject($temp);
+            $temp = \Repository\ORM\DatabaseObject::objectToArray($temp);
+            unset($temp['dbTable']);
+            unset($temp['primaryKeysArray']);
+            unset($temp['extraAttr']);
+            $dataArray[] = $temp;
+
+            
+        }
+
+        $res->setSuccess(true);
+        $res->setHttpStatusCode(200);
+        $res->addMessage("Objects changed successfully.");
+        $res->setData($dataArray);
+        $res->send();
+        exit;
+
+
+    }
+
+    public static function sendIssueChat($req, $res, $userId)
+    {
+        self::initialCheck($req, $res);
+
+        if($req->body() == null || !isset($req->body()->message) || !isset($req->body()->sent_to) || !isset($req->body()->issue_id))
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Bad Request.1");
+            $res->send();
+            exit;
+        }
+
+        $body = $req->body();
+
+        $issueId = $body->issue_id;
+        $sentTo = $body->sent_to;
+        $repliedTo = $body->replied_to;
+        $message = $body->message;
+
+        $accUser = \Repository\ORM\ORM::getIssueAcceptedUser($issueId);
+
+        if($accUser == null)
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Bad Request.");
+            $res->send();
+            exit;
+        }
+        $accUser = $accUser['accepted_user'];
+
+        $issueobj = \Repository\ORM\ORM::makeIssue($issueId);
+        $postedUser = $issueobj->getUserId();
+
+        if(($userId != $postedUser && $userId != $accUser) || ($sentTo != $postedUser && $sentTo != $accUser) || $message == "")
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(400);
+            $res->addMessage("Bad Request. 2");
+            $res->send();
+            exit;
+        }
+
+        $issueChatObj = \Models\IssueChat::create();
+        $issueChatObj->initialize(null, $userId, $issueId, $message, null, date("Y-m-d"), date("H:i:s"), null, null, $sentTo, 'not sent');
+        $id = \Repository\ORM\ORM::writeObject($issueChatObj);
+        $issueChatObj->setMessageId($id);
+        $dataArray = \Repository\ORM\DatabaseObject::objectToArray($issueChatObj);
+        $dataArray['me'] = $userId;
+        unset($dataArray['dbTable']);
+        unset($dataArray['primaryKeysArray']);
+        unset($dataArray['extraAttr']);
+        $res->setSuccess(true);
+        $res->setHttpStatusCode(200);
+        $res->addMessage("Chat created successfully.");
+        $res->setData($dataArray);
+        $res->send();
+        exit;
+        
+
+    }
+
+    public static function createIssue($req, $res, $userId)
+    {
+        //check for correct user type
+
+        self::initialCheck($req, $res);
+
+        $body = $req->body();
+
+        //Add backend validation
+
+        $obj = \Models\Issue::create();
+        $obj->initialize($userId, 'pending', $body->title, $body->description, $body->interest, $body->embedded_media, $body->media_count, 'active');
+        $id = \Repository\ORM\ORM::writeObject($obj);
+        $obj->setIssueId($id);
+        $dataArray = \Repository\ORM\DatabaseObject::objectToArray($obj);
+        unset($dataArray['dbTable']);
+        unset($dataArray['primaryKeysArray']);
+        unset($dataArray['extraAttr']);
+        $res->setSuccess(true);
+        $res->setHttpStatusCode(200);
+        $res->addMessage("Issue created successfully.");
+        $res->setData($dataArray);
+        $res->send();
+        exit;
 
     }
 

@@ -39,6 +39,25 @@ Router\Router::options("/issues/issues_on_user", Controllers\IssueController::cl
 Router\Router::get("/issues/issues_accepted_by_user", Controllers\IssueController::class."::issuesAcceptedByUser");
 Router\Router::options("/issues/issues_accepted_by_user", Controllers\IssueController::class."::CROS");
 
+Router\Router::post("/issues/accept_issue", Controllers\IssueController::class."::acceptIssue");
+Router\Router::options("/issues/accept_issue", Controllers\IssueController::class."::CROS");
+
+
+Router\Router::patch("/issues/mark_issue_chat_read", Controllers\IssueController::class."::markIssueChatAsRead");
+Router\Router::options("/issues/mark_issue_chat_read", Controllers\IssueController::class."::CROS");
+
+
+Router\Router::post("/issues/send_issue_chat", Controllers\IssueController::class."::sendIssueChat");
+Router\Router::options("/issues/send_issue_chat", Controllers\IssueController::class."::CROS");
+
+Router\Router::post("/issues/create_issue", Controllers\IssueController::class."::createIssue");
+Router\Router::options("/issues/create_issue", Controllers\IssueController::class."::CROS");
+
+Router\Router::post("/issues/create_event", Controllers\EventController::class."::createEvent");
+Router\Router::options("/issues/create_event", Controllers\EventController::class."::CROS");
+
+Router\Router::get("/issues/unsent_issue_chat", Controllers\IssueController::class."::getUnSentIssueChat");
+Router\Router::options("/issues/unsent_issue_chat", Controllers\IssueController::class."::CROS");
 
 Router\Router::listen(function($port){
     echo "<br><h1>Server up and running on port: $port</h1><br>";

@@ -14,9 +14,25 @@ class IssueChat extends HuddleObj
     private $read_status;
     private $status;
     private $sent_to;
+    private $sent_status;
 
     protected $dbTable = "issue_chat";
     protected $primaryKeysArray = ["message_id"];
+
+    public function initialize($messageId, $userId, $issueId, $message, $repliedTo, $messageDate, $messageTime, $readStatus, $status, $sentTo, $sentStatus)
+    {
+        $this->setMessageId($messageId);
+        $this->setUserId($userId);
+        $this->setIssueId($issueId);
+        $this->setMessage($message);
+        $this->setRepliedTo($repliedTo);
+        $this->setMessageDate($messageDate);
+        $this->setMessageTime($messageTime);
+        $this->setReadStatus($readStatus);
+        $this->setStatus($status);
+        $this->setSentTo($sentTo);
+        $this->setSentStatus($sentStatus);
+    }
 
     public function setMessageId($messageId)
     {
@@ -68,6 +84,11 @@ class IssueChat extends HuddleObj
         $this->sent_to = $sentTo;
     }
 
+    public function setSentStatus($sentStatus)
+    {
+        $this->sent_status = $sentStatus;
+    }
+
     public function getMessageId()
     {
         return $this->message_id;
@@ -116,6 +137,11 @@ class IssueChat extends HuddleObj
     public function getSentTo()
     {
         return $this->sent_to;
+    }
+
+    public function getSentStatus()
+    {
+        return $this->sent_status;
     }
 
 }

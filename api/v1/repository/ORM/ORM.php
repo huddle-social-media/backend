@@ -168,6 +168,12 @@ class ORM
         return DatabaseObject::MapRelationToObject('Issue', $query, [$issueId]);
     }
 
+    public static function makeIssueChat($messageId)
+    {
+        $query = "SELECT * FROM `issue_chat` WHERE message_id = ?;";
+        return DatabaseObject::MapRelationToObject('IssueChat', $query, [$messageId]);
+    }
+
     public static function getIssuesOnUser($userId)
     {
         $query = "SELECT * FROM `issue` WHERE state = 'pending' AND status = 'active' AND interest IN (SELECT interest FROM issue_interest WHERE user_id = ? AND status = 'active') ORDER BY date_time DESC;";
@@ -215,6 +221,39 @@ class ORM
         $query = "SELECT * FROM `issue` WHERE status = 'active' AND user_id  = ? AND (state = 'accepted' OR state = 'closed') ORDER BY ASC";
         return DatabaseObject::MapRelationToObject('Issue', $query, [$userId]);
     }
+
+    // Checks whether an issue already has an accepted user
+
+    public static function checkIssueAcceptedUser($issue_id)
+    {
+        $query = "SELECT * FROM `issue_accepted` WHERE status = 'active' AND issue_id = ? AND (state = 'open' OR state = 'closed');";
+        return DatabaseObject::checkQuery($query, [$issue_id]);
+    }
+
+    // Checks whether the user exists in the issue_accpeted table for a specific issue
+
+    public static function checkAcceptedUserInTable($issue_id, $user_id)
+    {
+        $query = "SELECT * FROM `issue_accepted` WHERE status = 'active' AND issue_id = ? AND accepted_user = ?;";
+        return DatabaseObject::checkQuery($query, [$issue_id, $user_id]);
+    }
+
+    public static function makeIssueAccepted($issue_id, $accepted_user)
+    {
+        $query = "SELECT * FROM `issue_accepted` WHERE status = 'active' AND issue_id = ? AND accepted_user = ?;";
+        return DatabaseObject::MapRelationToObject('IssueAccepted', $query, [$issue_id, $accepted_user]);
+    }
+
+
+    public static function getUnSentIssueChat($userId)
+    {
+        $query = "SELECT * FROM `issue_chat` WHERE status= 'active' AND sent_to = ? AND sent_status = 'not sent' ORDER BY date_time ASC;";
+        return DatabaseObject::MapRelationToObject('IssueChat', $query, [$userId]);
+    }
+
+
+
+
 
     
 

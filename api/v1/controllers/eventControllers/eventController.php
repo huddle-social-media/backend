@@ -2,6 +2,8 @@
 
 namespace Controllers;
 
+use Models\User;
+
 require_once __DIR__."/../../helpers/autoLoader/autoLoader.php";
 
 
@@ -232,6 +234,12 @@ abstract class EventController{
         $eventAttendant->setStatus('deactive');
         \Repository\ORM\ORM::updateObject($eventAttendant);
         $dataArray = \Repository\ORM\DatabaseObject::objectToArray($eventAttendant);
+
+        $event = \Repository\ORM\ORM::makeEvent($req->body()->event_id);
+        $event->setGoing($event->getGoing() - 1);
+
+        \Repository\ORM\ORM::updateObject($event);
+
         unset($dataArray['dbTable']);
         unset($dataArray['primaryKeysArray']);
         $res->setSuccess(true);
@@ -273,7 +281,13 @@ abstract class EventController{
             $dataArray = \Repository\ORM\DatabaseObject::objectToArray($eventAtt);
             $dataArray['id'] = $id;
 
-        } 
+        }
+        
+        $event = \Repository\ORM\ORM::makeEvent($req->body()->event_id);
+        $event->setGoing($event->getGoing() + 1);
+
+        \Repository\ORM\ORM::updateObject($event);
+        
         unset($dataArray['dbTable']);
         unset($dataArray['primaryKeysArray']);
         $res->setSuccess(true);
@@ -333,6 +347,34 @@ abstract class EventController{
         $res->setData($dataArray);
         $res->send();
         exit;
+    }
+
+    public static function createEvent($req, $res, $userId)
+    {
+
+        //check for correct user type
+
+        self::initialCheck($req, $res);
+
+        $body = $req->body();
+
+        //Add backend validation
+
+        $obj = \Models\Event::create();
+        $obj->initialize($userId, $body->title, $body->description, $body->eventDate, $body->eventTime, $body->loc_lat, $body->loc_lng, $body->interest, 0);
+        $id = \Repository\ORM\ORM::writeObject($obj);
+        $obj->setEventId($id);
+        $dataArray = \Repository\ORM\DatabaseObject::objectToArray($obj);
+        unset($dataArray['dbTable']);
+        unset($dataArray['primaryKeysArray']);
+        unset($dataArray['extraAttr']);
+        $res->setSuccess(true);
+        $res->setHttpStatusCode(200);
+        $res->addMessage("Event created successfully.");
+        $res->setData($dataArray);
+        $res->send();
+        exit;
+
     }
 
     public static function CROS($req, $res) {
