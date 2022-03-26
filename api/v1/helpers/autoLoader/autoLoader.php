@@ -14,6 +14,7 @@ spl_autoload_register(function ($className)
         'controllers/userControllers/',
         'controllers/eventControllers/',
         'controllers/issueControllers/',
+        'controllers/chatControllers/',
         'config/database/',
         'helpers/JWT/',
         'helpers/Response/',
@@ -31,6 +32,7 @@ spl_autoload_register(function ($className)
         'models/events/',
         'models/abstract/',
         'models/action/',
+        'models/chat/',
         'models/imgs/'
     );
     

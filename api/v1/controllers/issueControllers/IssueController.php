@@ -36,6 +36,108 @@ class IssueController
 
         $issueList = \Repository\ORM\ORM::getIssuesOnUser($userId);
 
+        
+
+        $dataArray = [];
+
+        if($issueList == null)
+        {
+            $res->setSuccess(true);
+            $res->setHttpStatusCode(200);
+            $res->setData(null);
+            $res->send();
+            exit;
+        }
+
+        if(is_array($issueList))
+        {
+            foreach($issueList as $issue)
+            {
+                $issue = self::adjustTime($issue);
+                $temp = \Repository\ORM\DatabaseObject::objectToArray($issue);
+                unset($temp['dbTable']);
+                unset($temp['primaryKeysArray']);
+                $temp['me'] = $userId;
+                $dataArray[] = $temp;
+            }
+
+        }else
+        {
+            $issueList = self::adjustTime($issueList);
+            $temp = \Repository\ORM\DatabaseObject::objectToArray($issueList);
+            unset($temp['dbTable']);
+            unset($temp['primaryKeysArray']);
+            $temp['me'] = $userId;
+            $dataArray[] = $temp;
+            
+        }
+        $res->setSuccess(true);
+        $res->setHttpStatusCode(200);
+        $res->setData($dataArray);
+        $res->send();
+        exit;
+
+    }
+
+    public static function rejectIssue($req, $res, $userId)
+    {
+        self::initialCheck($req, $res);
+
+        $body = $req->body();
+
+        if(!isset($body) && !isset($body->issue_id))
+        {
+            $res->setSuccess(false);
+            $res->setHttpStatusCode(500);
+            $res->addMessage("System error.");
+            $res->send();
+            exit;
+        }
+
+        $issue_id = $body->issue_id;
+
+        $acc_user = \Repository\ORM\ORM::getIssueAcceptedUser($issue_id);
+
+        $issue = \Repository\ORM\ORM::makeIssue($issue_id);
+        $issue->setState('pending');
+        \Repository\ORM\ORM::updateObject($issue);
+
+        if($acc_user == null)
+        {
+            $obj = \Models\IssueAccepted::create();
+            $obj->initialize($issue_id, $userId, 'closed', date("Y-m-d"), date("H:i:s"), 'rejected');
+            \Repository\ORM\ORM::writeObject($obj);
+            $dataArray = \Repository\ORM\DatabaseObject::objectToArray($obj);
+            $res->setSuccess(true);
+            $res->setHttpStatusCode(201);
+            $res->addMessage('Issue Rejected');
+            $res->setData($dataArray);
+            $res->send();
+            exit;
+        }else
+        {
+            $obj = \Repository\ORM\ORM::makeIssueAccepted($issue_id, $userId);
+            $obj->setState('rejected');
+            \Repository\ORM\ORM::updateObject($obj);
+            $dataArray = \Repository\ORM\DatabaseObject::objectToArray($obj);
+            $res->setSuccess(true);
+            $res->setHttpStatusCode(201);
+            $res->addMessage('Issue Rejected');
+            $res->setData($dataArray);
+            $res->send();
+            exit;
+
+        }
+
+
+    }
+
+    public static function myPendingIssues($req, $res, $userId)
+    {
+        self::initialCheck($req, $res);
+
+        $issueList = \Repository\ORM\ORM::getMyPendingIssues($userId);
+
         $dataArray = [];
 
         if($issueList == null)
@@ -191,9 +293,6 @@ class IssueController
         $issueList = \Repository\ORM\ORM::getMyAcceptedIssues($userId);
 
 
-
-        $issueIdList = [];
-
         if($issueList == null)
         {
             $res->setSuccess(true);
@@ -209,21 +308,22 @@ class IssueController
             {
                 $issue = self::adjustTime($issue);
                 $temp = \Repository\ORM\DatabaseObject::objectToArray($issue);
-                unset($temp['dbTable']);
-                unset($temp['primaryKeysArray']);
-                $temp = self::checkClosedStateOfIssue($issueIdList, $temp);
-                $temp = self::getChatStatus($temp, $userId);
-                $temp = self::getMessage($temp, $res, $userId);
-                $accUser = \Repository\ORM\ORM::getIssueAcceptedUser($temp->issue_id);
+                $issue_id = $temp['issue_id'];
+                $accUser = \Repository\ORM\ORM::getIssueAcceptedUser($issue_id);
                 if($accUser == null)
                 {
                     $res->setSuccess(false);
-                    $res->setHttpStatusCode(400);
+                    $res->setHttpStatusCode(500);
                     $res->addMessage("System error.");
                     $res->send();
                     exit;
                 }
                 $accUser = $accUser['accepted_user'];
+                unset($temp['dbTable']);
+                unset($temp['primaryKeysArray']);
+                
+                $temp = self::getChatStatus($temp, $accUser);
+                $temp = self::getMessage($temp, $res, $userId);
                 $temp['accepted_user'] = $accUser;
                 $temp['me'] = $userId;
                 $dataArray[] = $temp;
@@ -237,10 +337,8 @@ class IssueController
             $temp = \Repository\ORM\DatabaseObject::objectToArray($issueList);
             unset($temp['dbTable']);
             unset($temp['primaryKeysArray']);
-            $temp = self::checkClosedStateOfIssue($issueIdList, $temp);
-            $temp = self::getChatStatus($temp, $userId);
-            $temp = self::getMessage($temp, $res, $userId);
-            $accUser = \Repository\ORM\ORM::getIssueAcceptedUser($temp->issue_id);
+            $issue_id = $temp['issue_id'];
+            $accUser = \Repository\ORM\ORM::getIssueAcceptedUser($issue_id);
             if($accUser == null)
             {
                 $res->setSuccess(false);
@@ -250,6 +348,9 @@ class IssueController
                 exit;
             }
             $accUser = $accUser['accepted_user'];
+            $temp = self::getChatStatus($temp, $accUser);
+            $temp = self::getMessage($temp, $res, $userId);
+            
             $temp['accepted_user'] = $accUser;
             $temp['me'] = $userId;
             $dataArray[] = $temp;
@@ -293,14 +394,16 @@ class IssueController
         $accUser = $accUser['accepted_user'];
 
         $sentTo = $accUser;
+        $from = $postedUser;
 
         if($user_id == $accUser)
         {
             $sentTo = $postedUser;
+            $from = $accUser;
         }
 
 
-        $myMessages = \Repository\ORM\ORM::getReadIssueChatById($issue_id, $user_id, $postedUser );
+        $myMessages = \Repository\ORM\ORM::getReadIssueChatById($issue_id, $from, $sentTo );
 
 
         $myMessArray = [];
@@ -325,7 +428,7 @@ class IssueController
             $myMessArray[] = $temp;
         }
 
-        $unreadMessages = \Repository\ORM\ORM::getUnreadIssueChatById($issue_id, $user_id, $sentTo);
+        $unreadMessages = \Repository\ORM\ORM::getUnreadIssueChatById($issue_id, $from, $sentTo);
 
         $myUnreadArray = [];
 

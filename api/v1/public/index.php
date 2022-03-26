@@ -42,6 +42,9 @@ Router\Router::options("/issues/issues_accepted_by_user", Controllers\IssueContr
 Router\Router::post("/issues/accept_issue", Controllers\IssueController::class."::acceptIssue");
 Router\Router::options("/issues/accept_issue", Controllers\IssueController::class."::CROS");
 
+Router\Router::post("/issues/reject_issue", Controllers\IssueController::class."::rejectIssue");
+Router\Router::options("/issues/reject_issue", Controllers\IssueController::class."::CROS");
+
 
 Router\Router::patch("/issues/mark_issue_chat_read", Controllers\IssueController::class."::markIssueChatAsRead");
 Router\Router::options("/issues/mark_issue_chat_read", Controllers\IssueController::class."::CROS");
@@ -58,6 +61,14 @@ Router\Router::options("/issues/create_event", Controllers\EventController::clas
 
 Router\Router::get("/issues/unsent_issue_chat", Controllers\IssueController::class."::getUnSentIssueChat");
 Router\Router::options("/issues/unsent_issue_chat", Controllers\IssueController::class."::CROS");
+
+
+Router\Router::get("/issues/my_accepted_issues", Controllers\IssueController::class."::myAcceptedIssues");
+Router\Router::options("/issues/my_accepted_issues", Controllers\IssueController::class."::CROS");
+
+Router\Router::get("/issues/my_pending_issues", Controllers\IssueController::class."::myPendingIssues");
+Router\Router::options("/issues/my_pending_issues", Controllers\IssueController::class."::CROS");
+
 
 Router\Router::listen(function($port){
     echo "<br><h1>Server up and running on port: $port</h1><br>";

@@ -176,7 +176,13 @@ class ORM
 
     public static function getIssuesOnUser($userId)
     {
-        $query = "SELECT * FROM `issue` WHERE state = 'pending' AND status = 'active' AND interest IN (SELECT interest FROM issue_interest WHERE user_id = ? AND status = 'active') ORDER BY date_time DESC;";
+        $query = "SELECT * FROM `issue` WHERE state = 'pending' AND status = 'active' AND interest IN (SELECT interest FROM issue_interest WHERE user_id = ? AND status = 'active') AND issue_id NOT IN (SELECT issue_id FROM `issue_accepted` WHERE accepted_user = ? AND state = 'rejected') ORDER BY date_time DESC;";
+        return DatabaseObject::MapRelationToObject('Issue', $query, [$userId, $userId]);
+    }
+
+    public static function getMyPendingIssues($userId)
+    {
+        $query = "SELECT * FROM `issue` WHERE state = 'pending' AND status = 'active' AND user_id = ? ORDER BY date_time DESC;";
         return DatabaseObject::MapRelationToObject('Issue', $query, [$userId]);
     }
 
@@ -218,7 +224,7 @@ class ORM
 
     public static function getMyAcceptedIssues($userId)
     {
-        $query = "SELECT * FROM `issue` WHERE status = 'active' AND user_id  = ? AND (state = 'accepted' OR state = 'closed') ORDER BY ASC";
+        $query = "SELECT * FROM `issue` WHERE status = 'active' AND user_id  = ? AND (state = 'accepted' OR state = 'closed') ORDER BY date_time ASC";
         return DatabaseObject::MapRelationToObject('Issue', $query, [$userId]);
     }
 
@@ -250,6 +256,17 @@ class ORM
         $query = "SELECT * FROM `issue_chat` WHERE status= 'active' AND sent_to = ? AND sent_status = 'not sent' ORDER BY date_time ASC;";
         return DatabaseObject::MapRelationToObject('IssueChat', $query, [$userId]);
     }
+
+    public static function getAllReadChats($userId)
+    {
+        $query = "SELECT * FROM `global_chat` WHERE status = 'active' AND (user_id = ? OR sent_to = ?) AND message_id NOT IN (SELECT message_id FROM `global_chat` WHERE sent_to = ? AND read_status = 'not read' AND status = 'active') ORDER BY date_time ASC;";
+        return DatabaseObject::MapRelationToObject('Chat', $query, [$userId, $userId]);
+    }
+
+    // public static function getAllUnReadChats($userId)
+    // {
+    //     $query = "SELECT * FROM `global_chat`"
+    // }
 
 
 
